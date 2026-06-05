@@ -7,5 +7,22 @@
 <body>
   <p>PF2Dice — open console for test output</p>
   <script type="module" src="engine.js"></script>
+  <script type="module">
+    import { twTrained, twExpert, twMaster, twLegendary, healSpell } from "./presets.js";
+    if (new URLSearchParams(window.location.search).get("test") === "1") {
+      const checks = [
+        ["twExpert(10)",        twExpert(10).ev(),       10.675],
+        ["twExpert(10) RS",     twExpert(10, true).ev(), 13.475],
+        ["twTrained(5)",        twTrained(5).ev(),        5.175],
+        ["twMaster(18)",        twMaster(18).ev(),       17.55],
+        ["healSpell(1) mean",   healSpell(1).ev(),       12.5],
+        ["healSpell(3) mean",   healSpell(3).ev(),       37.5],
+      ];
+      for (const [name, got, want] of checks) {
+        const ok = Math.abs(got - want) < 1e-4;
+        console[ok ? "log" : "error"](`${ok ? "PASS" : "FAIL"}: ${name} = ${got.toFixed(4)} (want ${want})`);
+      }
+    }
+  </script>
 </body>
 </html>
