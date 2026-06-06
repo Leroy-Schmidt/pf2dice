@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/hammerjs@2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom@2.0.1/dist/chartjs-plugin-zoom.min.js"></script>
   <script>
     (function() {
       const t = localStorage.getItem("pf2dice-theme") || "dark";
@@ -165,6 +167,25 @@
             <button class="qp" data-ac="26">26</button>
             <button class="qp" data-ac="30">30</button>
           </div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="f-offguard"> Target is off-guard (−2 AC)
+          </label>
+          <div class="two-col">
+            <label>Strikes this turn
+              <select id="f-nstrikes">
+                <option value="1">1 (no MAP)</option>
+                <option value="2">2 (with MAP)</option>
+                <option value="3">3 (with MAP)</option>
+              </select>
+            </label>
+            <label class="checkbox-label" style="align-self:end;padding-bottom:6px">
+              <input type="checkbox" id="f-agile"> Agile
+            </label>
+          </div>
+          <label>Resistance / weakness
+            <input type="number" id="f-resist" value="0" min="-30" max="30">
+          </label>
+          <p class="hint">Positive = resistance (reduce, min 0). Negative = weakness.</p>
         </div>
 
         <!-- Potion options -->
@@ -203,6 +224,7 @@
       <button id="btn-pdf" class="btn-mode active">PDF</button>
       <button id="btn-cdf" class="btn-mode">CDF</button>
       <button id="btn-grouped" class="btn-mode" title="Only applies to PDF">Side by side</button>
+      <button id="btn-zoom-reset" class="btn-mode" title="Reset zoom">Reset zoom</button>
       <div id="quantile-control" class="quantile-control" style="display:none">
         <input type="number" id="quantile-num" min="0" max="1" value="0.5" step="0.01">
         <input type="range"  id="quantile-slider" min="0" max="1" value="0.5" step="0.001">
@@ -213,6 +235,17 @@
     <div class="chart-wrap">
       <canvas id="chart"></canvas>
     </div>
+
+    <!-- Comparison panel -->
+    <section class="compare-panel" id="compare-panel">
+      <h2>Compare two series</h2>
+      <div class="compare-selectors">
+        <select id="cmp-a"></select>
+        <span class="compare-vs">vs</span>
+        <select id="cmp-b"></select>
+      </div>
+      <div id="compare-result" class="compare-result"></div>
+    </section>
   </main>
 
   <!-- Right sidebar: Code — toggle FIRST -->
@@ -260,8 +293,9 @@
 
 <!-- Self-tests: ?test=1 -->
 <script type="module">
-  import "./engine.js";
-  import { twTrained, twExpert, twMaster, twLegendary, healSpell } from "./presets.js";
+  import { compare, d, Dist } from "./engine.js";
+  import { twTrained, twExpert, twMaster, twLegendary, healSpell, strike, strikeRoutine, singleStrike } from "./presets.js";
+  import { evalExpr, evaluate } from "./expr.js";
   if (new URLSearchParams(window.location.search).get("test") === "1") {
     const checks = [
       ["twExpert(10)",    twExpert(10).ev(),       10.675],
@@ -275,6 +309,46 @@
       const ok = Math.abs(got - want) < 1e-4;
       console[ok ? "log" : "error"](`${ok ? "PASS" : "FAIL"}: ${name} = ${got.toFixed(4)} (want ${want})`);
     }
+
+    // compare: d6 vs d6 → symmetric, P(>) == P(<), and means equal
+    const c = compare(d(6), d(6));
+    const cmpOk = Math.abs(c.pAgtB - c.pAltB) < 1e-9 && Math.abs(c.meanDiff) < 1e-9
+                  && Math.abs(c.pAgtB + c.pEq + c.pAltB - 1) < 1e-9;
+    console[cmpOk ? "log" : "error"](`${cmpOk ? "PASS" : "FAIL"}: compare(d6,d6) symmetric (>=${c.pAgtB.toFixed(3)} ==${c.pEq.toFixed(3)})`);
+
+    // routine: 2 strikes mean == sum of two single strikes at MAP 0 and -5
+    const ac = 18, atk = 10, nd = 1, ds = 8, b = 4;
+    const rMean = strikeRoutine(atk, ac, 2, nd, ds, b).ev();
+    const sMean = singleStrike(atk, ac, nd, ds, b).ev() + singleStrike(atk - 5, ac, nd, ds, b).ev();
+    const rOk = Math.abs(rMean - sMean) < 1e-9;
+    console[rOk ? "log" : "error"](`${rOk ? "PASS" : "FAIL"}: routine(2) mean = sum of strikes (${rMean.toFixed(3)} vs ${sMean.toFixed(3)})`);
+
+    // resistance: strike with resist 3 has mean <= strike without; min 0
+    const noR = strike(atk, ac, nd, ds, b).ev();
+    const wR  = strike(atk, ac, nd, ds, b, 3).ev();
+    const resOk = wR <= noR;
+    console[resOk ? "log" : "error"](`${resOk ? "PASS" : "FAIL"}: resistance lowers mean (${wR.toFixed(3)} <= ${noR.toFixed(3)})`);
+
+    // expr: 2d6+5 mean == 12
+    const e1 = evalExpr("2d6 + 5").ev();
+    const e1ok = Math.abs(e1 - 12) < 1e-9;
+    console[e1ok ? "log" : "error"](`${e1ok ? "PASS" : "FAIL"}: expr 2d6+5 mean (${e1.toFixed(3)} == 12)`);
+
+    // expr: scalar * dice scales values → 2*d6 mean == 7 (avg of 2,4,..12)
+    const e2 = evalExpr("2 * d6").ev();
+    const e2ok = Math.abs(e2 - 7) < 1e-9;
+    console[e2ok ? "log" : "error"](`${e2ok ? "PASS" : "FAIL"}: expr 2*d6 scales values (${e2.toFixed(3)} == 7)`);
+
+    // expr: degree * damage == strike() with same params
+    const eAtk = evalExpr("pf2attack(+5, 20) * (2d6 + 5)").ev();
+    const ref  = strike(5, 20, 2, 6, 5).ev();
+    const e3ok = Math.abs(eAtk - ref) < 1e-9;
+    console[e3ok ? "log" : "error"](`${e3ok ? "PASS" : "FAIL"}: expr pf2attack*dmg == strike() (${eAtk.toFixed(3)} == ${ref.toFixed(3)})`);
+
+    // statements: variables + output + named
+    const prog = evaluate('gs = pf2attack(+9,20) * (2d6+4)\noutput gs named "Greatsword"\noutput twExpert(12)');
+    const e4ok = prog.errors.length === 0 && prog.series.length === 2 && prog.series[0].label === "Greatsword";
+    console[e4ok ? "log" : "error"](`${e4ok ? "PASS" : "FAIL"}: statement layer (series=${prog.series.length}, errors=${prog.errors.length})`);
   }
 </script>
 

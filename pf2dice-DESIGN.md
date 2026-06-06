@@ -395,4 +395,144 @@ These are explicitly deferred to avoid scope creep:
 
 ---
 
+## 16. v2 — Expression engine ("code is source of truth")
+
+**Decision (made with the client):** The editable code panel becomes the authoritative
+model. The form panel is demoted to a *snippet inserter* that writes code into the panel.
+Editing code re-evaluates and redraws. This is the AnyDice model. We do NOT attempt full
+two-way binding (code → form repopulation); that was explicitly rejected as a tar pit.
+
+### 16.1 Data flow
+
+```
+code text  ──parse──▶  statements  ──evaluate──▶  series (Dist[])  ──▶  chart/stats
+   ▲                                                                       
+   └── form "Insert" buttons append/replace snippets in the code text ─────┘
+```
+
+The code text is persisted (URL hash + localStorage), not the series array.
+
+### 16.2 Language
+
+A program is a list of newline-separated statements:
+
+```
+greatsword = pf2attack(+9, 20) * (2d6 + 4)      # assignment (variable, not plotted)
+output greatsword named "Greatsword vs AC20"     # plotted series
+output twExpert(12) named "TW expert +12"
+output pf2save(25, +8) * (8d6) named "Fireball"   # basic-save spell
+```
+
+- `name = expr` — bind a variable (reusable, not plotted)
+- `output expr [named "label"]` — evaluate and add as a plotted series
+- `#` to end of line — comment
+
+### 16.3 Grammar (precedence, low → high)
+
+```
+program     := statement (NEWLINE statement)*
+statement   := IDENT '=' expr | 'output' expr ('named' STRING)?
+expr        := additive
+additive    := multiplicative (('+' | '-') multiplicative)*
+multiplicative := unary ('*' unary)*
+unary       := ('+' | '-') unary | primary
+primary     := NUMBER | DICE | funcall | IDENT | '(' expr ')'
+funcall     := IDENT '(' (expr (',' expr)*)? ')'
+DICE        := NUMBER 'd' NUMBER | 'd' NUMBER       # 2d6, d8 (= 1d8)
+```
+
+### 16.4 Value model & operator semantics
+
+Every expression evaluates to a `Dist`. Two special cases drive `*`:
+
+- A **point-mass** Dist (`map.size === 1`, e.g. the literal `5`) acts as a **scalar**.
+- A Dist tagged `.isDegree = true` (returned by `pf2attack`/`pf2save`/`pf2roll`) is a
+  distribution over *damage multipliers* (e.g. {0: p, 1: p, 2: p}).
+
+`*` overload (consistent with §4):
+
+| Left × Right | Result |
+|---|---|
+| scalar × Dist | `Dist.scale(scalar)` — scales **values** (`2 * d6` → {2,4,…12}) |
+| degree × Dist | **pf2damage mixture**: Σ over (mult, p) of `damage.scale(mult)` weighted by p |
+| Dist × Dist | independent product of values (rare; supported for completeness) |
+
+`+` / `-` are convolution (independent sum); `a - b` = `a.add(b.negate())`.
+`2d6 + 4` therefore shifts by 4 (convolve with point-mass 4). Matches §3.
+
+### 16.5 Built-in functions
+
+```
+d(n)                         uniform die 1..n
+const(k)                     point mass at k
+pf2attack(mod, dc)           degree dist, mults {cf:0, f:0, s:1, cs:2}
+pf2save(dc, saveMod)         degree dist, mults {cf:2, f:1, s:0.5, cs:0} (basic save)
+pf2roll(mod, dc, cf,f,s,cs)  degree dist, fully custom mults
+twTrained/Expert/Master/Legendary(mod [, rs])
+healSpell(rank)
+potionMinor/Lesser/Moderate/Greater()
+strike(atk, ac, nDice, dieSize, bonus [, resist])
+strikeRoutine(atk, ac, nStrikes, nDice, dieSize, bonus [, agile [, resist]])
+```
+
+Scalar arguments must be point-mass expressions; `asScalar()` throws otherwise.
+`+5` parses as unary-plus → `const(5)` → scalar 5, so `pf2attack(+5, 20)` reads naturally.
+
+### 16.6 Known limitations (v2.0)
+
+- Half-damage (`scale(0.5)`) produces fractional outcomes; PF2e floors. Rounding is a
+  documented refinement, deferred.
+- No conditional/branching turns yet (trip → off-guard). That is v3 (the Turn Builder),
+  which will add an `if degree(X) then … else …` form on top of this engine.
+
+### 16.7 Module: `expr.js`
+
+`expr.js` is inserted in dependency order **after** `presets.js`, **before** `ui.js`:
+`engine → presets → expr → codegen → ui → chart`. Exports `evaluate(src)` →
+`{ series: Dist[], errors: [] }`, plus `tokenize`/`parseExpr` for tests.
+
+---
+
+## 17. v2 — UI redesign
+
+Driven by client feedback once the app outgrew the v1 layout.
+
+- **Stats as a real table** (not a left-smushed row): columns mean, **σ (std dev)**,
+  min, Q1, median, Q3, P10, P90, max — one row per series, color-keyed.
+- **Toolbar split**: data-view toggles (PDF / CDF) separated from view controls
+  (zoom in/out/reset). View controls move to **icon buttons top-right of the chart**.
+- **Zoom**: x-axis-locked by default; typed min/max limit inputs (preferred over sliders);
+  always a reset; optional bottom scrollbar. No hidden free-pan.
+- **CDF value lookup**: complement of the quantile line — type an outcome value *x*,
+  read back P(X ≤ x) per series (inverse direction of the existing quantile slider).
+- Engine adds `Dist.stats()` → include `std` (standard deviation) and `q25`/`q75`.
+
+---
+
+## 18. v2 — Theme: medieval fantasy
+
+The default should *read* as Pathfinder, not a generic dashboard.
+
+- Parchment/vellum surfaces, deep ink text, oxblood/gold accents.
+- A serif display face for headings (e.g. a fantasy/blackletter-adjacent web font),
+  humanist sans for body, monospace for the code panel.
+- Subtle texture (paper grain) behind panels; ornamental rule dividers.
+- Keep the existing theme switcher; "Parchment" becomes the default and is fleshed out.
+
+---
+
+## 19. v2 build order
+
+1. **`expr.js`** — tokenizer, parser, evaluator, operator overloads. Self-tests
+   (`pf2attack(+5,20)*(2d6+5)` mean, scalar vs degree `*`, dice literals). ← *foundation*
+2. **Statement layer** — `output` / assignment / `named`. Editable code panel becomes
+   authoritative; form buttons insert snippets. URL/localStorage stores code text.
+3. **UI redesign** — stats table (+σ), toolbar split, zoom controls, CDF value lookup.
+4. **Fantasy theme** — fonts, parchment palette, textures.
+5. **(v3) Turn Builder** — conditional/branching sequences atop the expression engine.
+
+Each step ships working and self-tested before the next begins (same discipline as v1).
+
+---
+
 *End of design document. If you are a new AI session reading this: implement strictly according to this spec. If something is ambiguous, add a comment in code and note it for the human. Do not invent features not listed here.*

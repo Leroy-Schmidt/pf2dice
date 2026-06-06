@@ -342,6 +342,46 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 .btn-mode:hover { border-color: var(--accent); color: var(--accent); }
 .btn-mode.active { border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
+/* ── Comparison panel ── */
+
+.compare-panel {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.compare-selectors {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.compare-selectors select { flex: 1; min-width: 140px; }
+.compare-vs { color: var(--text-dim); font-size: 0.85rem; }
+
+.cmp-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 10px;
+}
+
+.cmp-stat {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 8px 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  text-align: center;
+}
+.cmp-stat-val { font-size: 1.3rem; font-weight: 700; color: var(--text); }
+.cmp-stat-lbl { font-size: 0.72rem; color: var(--text-dim); line-height: 1.3; }
+
 /* ── Quantile control ── */
 
 .quantile-control {

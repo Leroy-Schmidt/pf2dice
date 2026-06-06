@@ -1,9 +1,10 @@
 import {
   twTrained, twExpert, twMaster, twLegendary,
   healSpell, potionMinor, potionLesser, potionModerate, potionGreater,
-  strike,
+  strike, strikeRoutine,
 } from "./presets.js";
-import { renderChart, setChartMode, getChartMode, destroyChart, setGrouped, getGrouped, setQuantile } from "./chart.js";
+import { compare } from "./engine.js";
+import { renderChart, setChartMode, getChartMode, destroyChart, setGrouped, getGrouped, setQuantile, resetZoom } from "./chart.js";
 import { generateCode } from "./codegen.js";
 
 const COLORS = [
@@ -40,6 +41,10 @@ function _resolvePreset() {
       numDice:   parseInt(document.getElementById("f-ndice").value)     || 1,
       dieSize:   parseInt(document.getElementById("f-dsize").value)     || 8,
       dmgBonus:  parseInt(document.getElementById("f-dmgbonus").value)  || 0,
+      offguard:  document.getElementById("f-offguard").checked,
+      nStrikes:  parseInt(document.getElementById("f-nstrikes").value)  || 1,
+      agile:     document.getElementById("f-agile").checked,
+      resist:    parseInt(document.getElementById("f-resist").value)    || 0,
     };
   }
 }
@@ -55,7 +60,12 @@ function _buildDist(s) {
     case "potionLesser":   return potionLesser();
     case "potionModerate": return potionModerate();
     case "potionGreater":  return potionGreater();
-    case "attack":         return strike(s.atk, s.ac, s.numDice, s.dieSize, s.dmgBonus);
+    case "attack": {
+      const ac = s.ac - (s.offguard ? 2 : 0);
+      return (s.nStrikes && s.nStrikes > 1)
+        ? strikeRoutine(s.atk, ac, s.nStrikes, s.numDice, s.dieSize, s.dmgBonus, s.agile, s.resist)
+        : strike(s.atk, ac, s.numDice, s.dieSize, s.dmgBonus, s.resist);
+    }
   }
 }
 
@@ -70,7 +80,12 @@ function _autoLabel(p) {
   const base = tierLabels[p.preset] ?? p.preset;
   if (p.preset.startsWith("tw"))   return `${base} +${p.mod}${p.rs ? " RS" : ""}`;
   if (p.preset === "healSpell")    return `${base} r${p.rank}`;
-  if (p.preset === "attack")       return `Strike +${p.atk} vs AC${p.ac} (${p.numDice}d${p.dieSize}+${p.dmgBonus})`;
+  if (p.preset === "attack") {
+    const n = p.nStrikes > 1 ? `${p.nStrikes}× ` : "";
+    const og = p.offguard ? " OG" : "";
+    const ag = p.agile ? " agile" : "";
+    return `${n}Strike +${p.atk} vs AC${p.ac}${og}${ag} (${p.numDice}d${p.dieSize}+${p.dmgBonus})`;
+  }
   return base;
 }
 
@@ -86,7 +101,63 @@ function _refresh() {
   _renderStats(dists);
   _renderCode();
   _renderSeriesList();
+  _renderCompare();
   _saveToUrl();
+}
+
+function _renderCompare() {
+  const selA = document.getElementById("cmp-a");
+  const selB = document.getElementById("cmp-b");
+  const out  = document.getElementById("compare-result");
+  if (!selA || !selB || !out) return;
+
+  if (_series.length < 2) {
+    selA.innerHTML = selB.innerHTML = "";
+    out.innerHTML = `<p class="hint">Add at least two series to compare.</p>`;
+    return;
+  }
+
+  // Preserve current selections where possible
+  const prevA = selA.value, prevB = selB.value;
+  const opts = _series.map((s, i) => `<option value="${i}">${s.label}</option>`).join("");
+  selA.innerHTML = opts;
+  selB.innerHTML = opts;
+  selA.value = prevA && prevA < _series.length ? prevA : "0";
+  selB.value = prevB && prevB < _series.length ? prevB : "1";
+  if (selA.value === selB.value && _series.length > 1) {
+    selB.value = selA.value === "0" ? "1" : "0";
+  }
+
+  const a = _series[parseInt(selA.value)];
+  const b = _series[parseInt(selB.value)];
+  if (!a || !b) { out.innerHTML = ""; return; }
+
+  const distA = _buildDist(a);
+  const distB = _buildDist(b);
+  const c = compare(distA, distB);
+
+  const pct = x => (x * 100).toFixed(1) + "%";
+  const diffSign = c.meanDiff >= 0 ? "+" : "";
+
+  out.innerHTML = `
+    <div class="cmp-grid">
+      <div class="cmp-stat">
+        <span class="cmp-stat-val" style="color:${a.color}">${pct(c.pAgtB)}</span>
+        <span class="cmp-stat-lbl">${a.label} &gt; ${b.label}</span>
+      </div>
+      <div class="cmp-stat">
+        <span class="cmp-stat-val">${pct(c.pEq)}</span>
+        <span class="cmp-stat-lbl">tie</span>
+      </div>
+      <div class="cmp-stat">
+        <span class="cmp-stat-val" style="color:${b.color}">${pct(c.pAltB)}</span>
+        <span class="cmp-stat-lbl">${b.label} &gt; ${a.label}</span>
+      </div>
+      <div class="cmp-stat">
+        <span class="cmp-stat-val">${diffSign}${c.meanDiff.toFixed(1)}</span>
+        <span class="cmp-stat-lbl">mean difference (A − B)</span>
+      </div>
+    </div>`;
 }
 
 function _renderStats(dists) {
@@ -228,7 +299,8 @@ export function initUI() {
 
   // Live preview triggers
   ["f-tw-tier","f-mod","f-rank","f-rs","f-potion-tier",
-   "f-atk","f-ac","f-ndice","f-dsize","f-dmgbonus"].forEach(id => {
+   "f-atk","f-ac","f-ndice","f-dsize","f-dmgbonus",
+   "f-offguard","f-nstrikes","f-agile","f-resist"].forEach(id => {
     document.getElementById(id)?.addEventListener("change", _updatePreview);
     document.getElementById(id)?.addEventListener("input",  _updatePreview);
   });
@@ -342,6 +414,12 @@ export function initUI() {
     btnGrouped.textContent = g ? "Overlapping" : "Side by side";
     destroyChart(); _refresh();
   });
+
+  document.getElementById("btn-zoom-reset")?.addEventListener("click", resetZoom);
+
+  // Comparison selectors
+  document.getElementById("cmp-a")?.addEventListener("change", _renderCompare);
+  document.getElementById("cmp-b")?.addEventListener("change", _renderCompare);
 
   _refresh();
 }

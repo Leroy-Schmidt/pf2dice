@@ -42,6 +42,17 @@ class Dist {
     return this.scale(-1);
   }
 
+  mapValues(fn) {
+    // Apply fn to every outcome value, merging probabilities that collide.
+    // Used for resistance/weakness (e.g. v => Math.max(0, v - R)).
+    const result = new Map();
+    for (const [v, p] of this.map) {
+      const nv = fn(v);
+      result.set(nv, (result.get(nv) ?? 0) + p);
+    }
+    return new Dist(result);
+  }
+
   weightedSum(weights) {
     // weights: array of [Dist, probability]
     const result = new Map();
@@ -240,4 +251,23 @@ if (new URLSearchParams(window.location.search).get("test") === "1") {
   runTests();
 }
 
-export { Dist, d, pf2roll, pf2damage, degreesOfSuccess };
+function compare(distA, distB) {
+  // Returns { pAgtB, pEq, pAltB, meanDiff } for two independent distributions.
+  let pAgt = 0, pEq = 0, pAlt = 0;
+  for (const [a, pa] of distA.map) {
+    for (const [b, pb] of distB.map) {
+      const joint = pa * pb;
+      if      (a > b) pAgt += joint;
+      else if (a < b) pAlt += joint;
+      else            pEq  += joint;
+    }
+  }
+  return {
+    pAgtB: pAgt,
+    pEq,
+    pAltB: pAlt,
+    meanDiff: distA.ev() - distB.ev(),
+  };
+}
+
+export { Dist, d, pf2roll, pf2damage, degreesOfSuccess, compare };

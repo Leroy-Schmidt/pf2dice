@@ -95,6 +95,15 @@ export function renderChart(series, canvasId = "chart") {
         label: ctx => `${ctx.dataset.label}: ${(ctx.parsed.y * 100).toFixed(2)}%`,
       },
     },
+    zoom: {
+      pan: { enabled: true, mode: "xy", modifierKey: "shift" },
+      zoom: {
+        wheel: { enabled: true },
+        drag:  { enabled: true, modifierKey: "ctrl" },
+        pinch: { enabled: true },
+        mode: "xy",
+      },
+    },
   };
 
   if (!isPdf) {
@@ -150,6 +159,10 @@ export function renderChart(series, canvasId = "chart") {
       },
     });
   }
+}
+
+export function resetZoom() {
+  if (_chart && _chart.resetZoom) _chart.resetZoom();
 }
 
 export function destroyChart() {
