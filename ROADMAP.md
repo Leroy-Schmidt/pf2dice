@@ -1,8 +1,8 @@
 # PF2Dice — Roadmap: Declutter, Restack, Onboard & Share
 
-> Status: **planned, approved — not yet implemented.** This is the agreed plan for the
-> next block of work. See `BACKLOG.md` for the running history and `pf2dice-DESIGN.md`
-> for architecture.
+> Status: **in progress.** Current block scope = Phases 1–3 (Phases 4–6 deferred).
+> Phase 1 (declutter & zoom fix) ✅ done. See `BACKLOG.md` for running history and
+> `pf2dice-DESIGN.md` for architecture.
 
 ## Context
 
@@ -27,12 +27,12 @@ screenshots. (Node isn't installed locally; `test-node.mjs` exists for when it i
 
 ---
 
-## Phase 1 — Declutter & zoom fix
-- `chart.js`: set `zoom.zoom.drag.enabled = false` (keep `pan {mode:"x"}` + wheel/pinch).
+## Phase 1 — Declutter & zoom fix ✅ done
+- `chart.js`: `zoom.zoom.drag.enabled = false` (keep `pan {mode:"x"}` + wheel/pinch).
   Drag = pan, wheel = zoom, no more drag-select box.
-- `index.html`: remove attack numeric quick-picks (`data-atk`/`data-ac`/`data-dmg`);
-  keep weapon-preset `<select>` + striking-rune row. Remove the top **Snippets** section.
-- `ui.js`: remove the matching `qp(...)` and snippet wiring.
+- `index.html`: removed attack numeric quick-picks (`data-atk`/`data-ac`/`data-dmg`);
+  kept weapon-preset `<select>` + striking-rune row. Removed the top **Snippets** section.
+- `ui.js`: removed the matching `qp(...)` and snippet wiring. Build marker `declutter-1`.
 
 ## Phase 2 — Stacked layout (Overleaf-style)
 - `index.html`: top `.io-row` with two collapsible panels **Form** (left) + **Code**

@@ -288,7 +288,7 @@ function _refreshScenarioList() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "theme-1";
+  if (typeof window !== "undefined") window.__pf2dice_build = "declutter-1";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -315,9 +315,6 @@ export function initUI() {
     btn.addEventListener("click", () => { document.getElementById(target).value = btn.dataset[Object.keys(btn.dataset)[0]]; _updatePreview(); }));
   qp(".qp[data-mod]", "f-mod");
   qp(".qp[data-rank]", "f-rank");
-  qp(".qp[data-atk]", "f-atk");
-  qp(".qp[data-ac]", "f-ac");
-  qp(".qp[data-dmg]", "f-dmgbonus");
 
   document.querySelectorAll(".qp[data-striking]").forEach(btn =>
     btn.addEventListener("click", () => { document.getElementById("f-ndice").value = btn.dataset.striking; _updatePreview(); }));
@@ -328,15 +325,6 @@ export function initUI() {
     document.getElementById("f-ndice").value = n;
     document.getElementById("f-dsize").value = size;
     _updatePreview();
-  });
-
-  // Snippet inserter
-  document.getElementById("btn-snippet")?.addEventListener("click", () => {
-    const snip = document.getElementById("f-snippet").value;
-    if (!snip) return;
-    const ta = _codeEl();
-    ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, "") + "\n" + snip : snip;
-    _evaluateAndRender();
   });
 
   // Insert / clear

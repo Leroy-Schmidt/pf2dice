@@ -1,6 +1,6 @@
 # PF2Dice — Design Document
-**Version:** 0.1 (pre-build)  
-**Purpose:** This document is the single source of truth for the project. Any new AI session or contributor should read this before touching any file. It encodes all design decisions made in the planning conversation so they do not have to be reconstructed.
+**Version:** 2.x (v1 + v2 shipped; see `ROADMAP.md` for the in-progress block)  
+**Purpose:** This document is the architecture source of truth for the project. Any new AI session or contributor should read this before touching any file. It encodes the design decisions behind the engine, expression language, and UI. `BACKLOG.md` tracks history; `ROADMAP.md` tracks the current block of work.
 
 ---
 
@@ -23,13 +23,16 @@ pf2dice/
 ├── index.html      Shell: loads modules, defines layout skeleton
 ├── engine.js       Core: Dist class, all primitives, self-tests
 ├── presets.js      Named series: TW tiers, heal spells, potions, strikes
-├── codegen.js      Form state → expression string (read-only mirror, v1)
-├── ui.js           Form rendering, event wiring, URL state encode/decode
-├── chart.js        Chart.js wrapper: multi-series PDF/CDF, stats bar, expand
-└── style.css       Split-pane layout, theming, stats bar, responsive
+├── expr.js         Expression engine: tokenizer, parser, evaluate(src) (v2)
+├── library.js      Content tables: targetAC/targetSave/levelDC, spell helpers
+├── codegen.js      Form state → expression string (snippet inserter)
+├── ui.js           Form rendering, event wiring, URL/localStorage state
+├── chart.js        Chart.js wrapper: multi-series PDF/CDF, zoom, stats
+├── style.css       Layout, theming (parchment default), stats table, responsive
+└── server.py       Dev-only no-store static server (live verification)
 ```
 
-**Rule:** No file imports from a file below it in this list except `index.html` which imports all. Dependency order: `engine → presets → codegen → ui → chart`. This keeps each file independently readable.
+**Rule:** No file imports from a file below it in this list except `index.html` which imports all. Dependency order: `engine → presets → expr → library → codegen → ui → chart`. This keeps each file independently readable.
 
 ---
 
@@ -381,15 +384,16 @@ Consistent across sessions:
 
 ---
 
-## 15. What v1 does NOT include
+## 15. Scope boundaries
 
-These are explicitly deferred to avoid scope creep:
+Shipped since v1 (historical note — these were the original v1 exclusions, now built in v2):
+the expression parser / editable code panel (§16), advantage/disadvantage via
+`keephigh`/`keeplow` and Fortune, and named scenarios (localStorage slots).
 
-- Expression parser / editable code panel (v2)
-- Advantage/disadvantage rolls
-- Persistent saves / multiple named scenarios
-- Mobile-optimised layout
-- Syntax highlighting in code panel
+Still explicitly out of scope:
+
+- Mobile-optimised layout (desktop-first)
+- Syntax highlighting / autocomplete in the code panel (deferred — see `BACKLOG.md`)
 - Any backend, database, or user accounts
 - Anything requiring npm or a build step
 

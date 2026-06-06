@@ -99,7 +99,7 @@ export function renderChart(series, canvasId = "chart") {
       pan: { enabled: true, mode: "x" },
       zoom: {
         wheel: { enabled: true },
-        drag:  { enabled: true },   // drag a box on the chart to zoom (x-axis)
+        drag:  { enabled: false },  // drag = pan (not a zoom box); wheel/pinch zoom
         pinch: { enabled: true },
         mode: "x",                  // x-axis locked: never zoom the probability axis
       },
