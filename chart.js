@@ -165,6 +165,22 @@ export function resetZoom() {
   if (_chart && _chart.resetZoom) _chart.resetZoom();
 }
 
+export function exportPNG(bg = "#1a1a1a", filename = "pf2dice.png") {
+  if (!_chart) return;
+  const src = _chart.canvas;
+  const tmp = document.createElement("canvas");
+  tmp.width = src.width;
+  tmp.height = src.height;
+  const ctx = tmp.getContext("2d");
+  ctx.fillStyle = bg;                 // composite onto a solid background
+  ctx.fillRect(0, 0, tmp.width, tmp.height);
+  ctx.drawImage(src, 0, 0);
+  const a = document.createElement("a");
+  a.href = tmp.toDataURL("image/png");
+  a.download = filename;
+  a.click();
+}
+
 export function destroyChart() {
   if (_chart) { _chart.destroy(); _chart = null; }
 }

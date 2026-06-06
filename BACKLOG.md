@@ -33,12 +33,14 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Form: "Snippets" inserter (low-clutter dropdown → appends code)
 - [x] Self-tests (target tables, fireball/electricArc means, all snippets evaluate clean)
 
-### 3. Quality of life
-- [ ] Export chart as PNG
-- [ ] Export visible distribution(s) as CSV
-- [ ] "Copy share link" button (current URL hash)
-- [ ] Saved scenarios (named localStorage slots: save / load / delete)
-- [ ] Code panel: lightweight syntax highlighting + function-name autocomplete
+### 3. Quality of life  ✅ done (highlighting/autocomplete deferred)
+- [x] Export chart as PNG (composited onto theme background)
+- [x] Export visible distribution(s) as CSV (value + per-series PDF columns)
+- [x] "Copy share link" button (current URL hash) with "Copied!" feedback
+- [x] Saved scenarios (named localStorage slots: save / load / delete)
+- [~] Code panel syntax highlighting + autocomplete — DEFERRED (needs overlay or
+      CodeMirror; not worth a fragile textarea hack. Revisit during/after redesign.)
+- [x] Dev: no-store server (server.py) for reliable live verification
 
 ### 4. UI redesign + declutter
 - [ ] Stats as a real table: mean, σ, min, Q1, median, Q3, P10, P90, max (add `std`,`q25`,`q75` to engine.stats)

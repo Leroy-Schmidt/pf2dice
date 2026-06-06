@@ -2,7 +2,7 @@ import { compare } from "./engine.js";
 import { evaluate, evalExpr } from "./expr.js";
 import {
   renderChart, setChartMode, getChartMode, destroyChart,
-  setGrouped, getGrouped, setQuantile, resetZoom,
+  setGrouped, getGrouped, setQuantile, resetZoom, exportPNG,
 } from "./chart.js";
 
 const COLORS = [
@@ -236,9 +236,53 @@ function _loadCode() {
   return localStorage.getItem("pf2dice-code") ?? DEFAULT_CODE;
 }
 
+// ── Export / share / scenarios ───────────────────────────────────────────────
+
+function _download(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a");
+  a.href = url; a.download = filename; a.click();
+  setTimeout(() => URL.revokeObjectURL(url), 1000);
+}
+
+function _exportCSV() {
+  const vis = _series.filter(s => s.visible);
+  if (!vis.length) return;
+  const xs = new Set();
+  const maps = vis.map(s => {
+    const m = new Map();
+    for (const [v, p] of s.map) { m.set(v, p); xs.add(v); }
+    return m;
+  });
+  const sorted = [...xs].sort((a, b) => a - b);
+  const esc = s => `"${String(s).replace(/"/g, '""')}"`;
+  const header = ["value", ...vis.map(s => esc(s.label))].join(",");
+  const rows = sorted.map(x => [x, ...maps.map(m => m.get(x) ?? 0)].join(","));
+  _download(new Blob([[header, ...rows].join("\n")], { type: "text/csv" }), "pf2dice.csv");
+}
+
+function _bgColor() {
+  return getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#1a1a1a";
+}
+
+const SCEN_KEY = "pf2dice-scenarios";
+function _loadScenarios() {
+  try { return JSON.parse(localStorage.getItem(SCEN_KEY)) || {}; } catch { return {}; }
+}
+function _saveScenarios(obj) { localStorage.setItem(SCEN_KEY, JSON.stringify(obj)); }
+function _refreshScenarioList() {
+  const sel = document.getElementById("scen-list");
+  if (!sel) return;
+  const scen = _loadScenarios();
+  const names = Object.keys(scen).sort();
+  sel.innerHTML = `<option value="">— saved —</option>` +
+    names.map(n => `<option value="${n.replace(/"/g, "&quot;")}">${n}</option>`).join("");
+}
+
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
+  if (typeof window !== "undefined") window.__pf2dice_build = "qol-1";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -368,6 +412,45 @@ export function initUI() {
   document.getElementById("btn-zoom-reset")?.addEventListener("click", resetZoom);
   document.getElementById("cmp-a")?.addEventListener("change", _renderCompare);
   document.getElementById("cmp-b")?.addEventListener("change", _renderCompare);
+
+  // Export / share
+  document.getElementById("btn-png")?.addEventListener("click", () => exportPNG(_bgColor(), "pf2dice.png"));
+  document.getElementById("btn-csv")?.addEventListener("click", _exportCSV);
+  document.getElementById("btn-share")?.addEventListener("click", async e => {
+    try {
+      await navigator.clipboard.writeText(location.href);
+      const b = e.target; const t = b.textContent;
+      b.textContent = "Copied!";
+      setTimeout(() => { b.textContent = t; }, 1200);
+    } catch {}
+  });
+
+  // Scenarios
+  _refreshScenarioList();
+  document.getElementById("btn-scen-save")?.addEventListener("click", () => {
+    const name = document.getElementById("scen-name").value.trim();
+    if (!name) return;
+    const scen = _loadScenarios();
+    scen[name] = _codeEl().value;
+    _saveScenarios(scen);
+    _refreshScenarioList();
+    document.getElementById("scen-list").value = name;
+    document.getElementById("scen-name").value = "";
+  });
+  document.getElementById("btn-scen-load")?.addEventListener("click", () => {
+    const name = document.getElementById("scen-list").value;
+    if (!name) return;
+    const scen = _loadScenarios();
+    if (scen[name] != null) { _codeEl().value = scen[name]; _evaluateAndRender(); }
+  });
+  document.getElementById("btn-scen-del")?.addEventListener("click", () => {
+    const name = document.getElementById("scen-list").value;
+    if (!name) return;
+    const scen = _loadScenarios();
+    delete scen[name];
+    _saveScenarios(scen);
+    _refreshScenarioList();
+  });
 
   // Reflect persisted chart mode in toolbar
   if (getChartMode() === "cdf") btnCdf.click();

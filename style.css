@@ -370,7 +370,13 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 
 /* ── Chart toolbar ── */
 
-.chart-toolbar { display: flex; gap: 8px; }
+.chart-toolbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.toolbar-spacer { flex: 1; min-width: 8px; }
+
+.scen-save-row, .scen-load-row { display: flex; gap: 6px; align-items: center; }
+.scen-save-row input { flex: 1; min-width: 0; }
+.scen-load-row select { flex: 1; min-width: 0; }
+.scen-load-row .btn-ghost, .scen-save-row .btn-ghost { width: auto; white-space: nowrap; padding: 5px 10px; }
 
 .btn-mode {
   background: var(--surface);

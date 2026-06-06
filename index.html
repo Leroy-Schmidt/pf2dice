@@ -240,6 +240,19 @@
         <button id="btn-clear" class="btn-ghost">Clear all code</button>
       </section>
 
+      <section class="panel">
+        <h2>Scenarios</h2>
+        <div class="scen-save-row">
+          <input type="text" id="scen-name" placeholder="scenario name">
+          <button id="btn-scen-save" class="btn-ghost">Save</button>
+        </div>
+        <div class="scen-load-row">
+          <select id="scen-list"><option value="">— saved —</option></select>
+          <button id="btn-scen-load" class="btn-ghost">Load</button>
+          <button id="btn-scen-del" class="btn-ghost" title="Delete">✕</button>
+        </div>
+      </section>
+
     </div>
   </aside>
 
@@ -250,6 +263,10 @@
       <button id="btn-cdf" class="btn-mode">CDF</button>
       <button id="btn-grouped" class="btn-mode" title="Only applies to PDF">Side by side</button>
       <button id="btn-zoom-reset" class="btn-mode" title="Reset zoom">Reset zoom</button>
+      <span class="toolbar-spacer"></span>
+      <button id="btn-png" class="btn-mode" title="Download chart as PNG">PNG</button>
+      <button id="btn-csv" class="btn-mode" title="Download distributions as CSV">CSV</button>
+      <button id="btn-share" class="btn-mode" title="Copy shareable link">Share</button>
       <div id="quantile-control" class="quantile-control" style="display:none">
         <input type="number" id="quantile-num" min="0" max="1" value="0.5" step="0.01">
         <input type="range"  id="quantile-slider" min="0" max="1" value="0.5" step="0.001">

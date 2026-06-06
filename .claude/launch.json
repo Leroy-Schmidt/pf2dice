@@ -4,8 +4,8 @@
     {
       "name": "pf2dice",
       "runtimeExecutable": "C:\\Users\\Nutzer\\miniconda3\\python.exe",
-      "runtimeArgs": ["-m", "http.server", "8000"],
-      "port": 8000
+      "runtimeArgs": ["server.py", "8001"],
+      "port": 8001
     }
   ]
 }
