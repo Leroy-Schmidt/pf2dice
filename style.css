@@ -640,6 +640,108 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
   position: relative;
 }
 
+/* ── Category icon picker ── */
+
+.panel-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 8px;
+}
+.btn-examples { flex-shrink: 0; font-size: 0.78rem; padding: 3px 8px; }
+
+.cat-icons {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 6px;
+}
+.cat-icon {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 4px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: color 0.15s, border-color 0.15s, background 0.15s;
+}
+.cat-icon:hover { color: var(--text); border-color: var(--accent); }
+.cat-icon.active {
+  color: var(--accent);
+  border-color: var(--accent);
+  background: var(--surface);
+}
+.cat-ico svg { width: 22px; height: 22px; display: block; }
+.cat-lbl { font-size: 0.66rem; letter-spacing: 0.02em; text-align: center; line-height: 1.1; }
+
+/* select kept for accessibility, hidden visually (icon row is the control) */
+.cat-select-fallback {
+  position: absolute;
+  width: 1px; height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+/* ── Examples gallery dialog ── */
+
+.examples-dialog {
+  width: min(760px, 92vw);
+  max-height: 82vh;
+  padding: 0;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  overflow: hidden;
+}
+.examples-dialog::backdrop { background: rgba(0,0,0,0.45); }
+.examples-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+}
+.examples-head h2 { margin: 0; }
+.examples-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(82vh - 56px);
+}
+.example-card {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding: 12px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+}
+.example-card h3 {
+  margin: 0;
+  font-family: var(--font-display);
+  font-size: 0.9rem;
+}
+.example-card p { margin: 0; font-size: 0.78rem; color: var(--text-dim); flex: 1; }
+.example-card code {
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.7rem;
+  color: var(--code-color);
+  background: var(--bg);
+  border-radius: 4px;
+  padding: 6px;
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.example-card button { align-self: flex-start; }
+
 /* ── Responsive ── */
 
 @media (max-width: 700px) {

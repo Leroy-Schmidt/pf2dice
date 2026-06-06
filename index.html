@@ -44,10 +44,19 @@
     <div class="sidebar-inner">
 
       <section class="panel">
-        <h2>Add series</h2>
+        <div class="panel-head">
+          <h2>Add series</h2>
+          <button type="button" id="btn-examples" class="btn-ghost btn-examples">Examples…</button>
+        </div>
 
-        <!-- Category -->
-        <label>Category
+        <!-- Category: icon buttons drive #f-category; select kept as fallback -->
+        <div class="cat-icons" id="cat-icons" role="group" aria-label="Category">
+          <button type="button" class="cat-icon" data-cat="tw" title="Treat Wounds"><span class="cat-ico"></span><span class="cat-lbl">Treat Wounds</span></button>
+          <button type="button" class="cat-icon" data-cat="heal" title="Heal Spell"><span class="cat-ico"></span><span class="cat-lbl">Heal</span></button>
+          <button type="button" class="cat-icon" data-cat="potion" title="Potion"><span class="cat-ico"></span><span class="cat-lbl">Potion</span></button>
+          <button type="button" class="cat-icon" data-cat="attack" title="Attack / Strike"><span class="cat-ico"></span><span class="cat-lbl">Strike</span></button>
+        </div>
+        <label class="cat-select-fallback">Category
           <select id="f-category">
             <option value="tw">Treat Wounds</option>
             <option value="heal">Heal Spell</option>
@@ -297,6 +306,15 @@
   </main>
 
 </div>
+
+<!-- Examples gallery (populated by ui.js) -->
+<dialog id="examples-dialog" class="examples-dialog">
+  <div class="examples-head">
+    <h2>Examples</h2>
+    <button type="button" id="examples-close" class="btn-ghost" title="Close">✕</button>
+  </div>
+  <div id="examples-grid" class="examples-grid"></div>
+</dialog>
 
 <script type="module">
   import { initUI } from "./ui.js";

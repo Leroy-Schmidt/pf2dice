@@ -17,8 +17,9 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 ---
 
 ## Next up
-The next block of work is planned in **`ROADMAP.md`** (declutter, stacked layout,
-examples gallery + category icons, `param` sliders, shareable interactive embed, docs).
+Block planned in **`ROADMAP.md`**. Phases 1–3 ✅ shipped (declutter & zoom fix, stacked
+layout, category icons + examples gallery). Remaining (deferred): Phase 4 `param` sliders,
+Phase 5 shareable interactive embed, Phase 6 developer docs (`README.md` / `VISION.md`).
 
 ---
 

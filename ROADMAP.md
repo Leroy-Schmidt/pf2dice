@@ -1,8 +1,8 @@
 # PF2Dice — Roadmap: Declutter, Restack, Onboard & Share
 
-> Status: **in progress.** Current block scope = Phases 1–3 (Phases 4–6 deferred).
+> Status: **block complete.** Scope was Phases 1–3 (Phases 4–6 deferred).
 > Phase 1 (declutter & zoom) ✅ · Phase 2 (stacked layout) ✅ · Phase 3 (icons + gallery)
-> next. See `BACKLOG.md` for running history and `pf2dice-DESIGN.md` for architecture.
+> ✅. See `BACKLOG.md` for running history and `pf2dice-DESIGN.md` for architecture.
 
 ## Context
 
@@ -44,13 +44,13 @@ screenshots. (Node isn't installed locally; `test-node.mjs` exists for when it i
   height:42vh}`; `.main-area` renamed `.output-area`.
 - `ui.js`: collapse wiring untouched (ids preserved); build marker `stacked-1`.
 
-## Phase 3 — Category icons + Examples gallery
-- New `icons.js`: inline SVG glyphs (Treat Wounds=bandage, Heal=plus, Strike=sword,
-  Potion=flask, Save=shield), themed via `currentColor`. Icon-button row at the top of
-  the Form sets `#f-category`; keep the `<select>` as accessible fallback.
-- **Examples gallery** (replaces Snippets): an "Examples" button opens a `<dialog>` of
-  cards (title + one-line explanation + "Load"); Load drops the example into the Code
-  panel and re-renders. Card data in `ui.js` (old snippet list + descriptions).
+## Phase 3 — Category icons + Examples gallery ✅ done
+- New `icons.js`: inline SVG glyphs (Treat Wounds=bandage, Heal=plus, Potion=flask,
+  Strike=sword), themed via `currentColor`. Icon-button row at the top of the Form sets
+  `#f-category`; the `<select>` is kept visually-hidden as an accessible fallback.
+- **Examples gallery** (replaced Snippets): an "Examples…" button opens a `<dialog>` of
+  cards (title + one-line explanation + code preview + "Load"); Load appends the example
+  to the Code panel and re-renders. Card data `EXAMPLES` in `ui.js`. Build `gallery-1`.
 
 ## Phase 4 — Parameters (`param`)
 - `expr.js`: `evaluate(src, paramValues = {})` parses

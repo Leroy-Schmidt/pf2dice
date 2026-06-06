@@ -251,26 +251,32 @@ saveSpell(dc, enemyMod, damageDist)
 
 ## 9. UI layout
 
+Stacked (Overleaf-style): the **Form** and **Code** panels sit side by side in a top
+`.io-row`; the full-width **output area** (toolbar, stats, chart, compare) scrolls below.
+Each top panel collapses to a 28px strip, widening its sibling (`flex:1 1 0`); state is
+persisted in localStorage (`pf2dice-sidebar-${side}`).
+
 ```
-┌──────────────────────┬────────────────────────┐
-│  FORM PANEL          │  CODE PANEL (read-only) │
-│  (left, collapsible) │  (right, monospace)     │
-│                      │                         │
-│  [Preset dropdown]   │  output tw_expert =     │
-│  [Mod slider +label] │    twExpert(12)          │
-│  [DC field]          │                         │
-│  [cf/f/s/cs fields]  │  output heal_3 =        │
-│  [+ Add series btn]  │    healSpell(3)          │
-│  [series list]       │                         │
-└──────────────────────┴─────────────────────────┘
-  [stats bar: one row per visible series, colour-coded]
-  mean 19.3  median 18  P10 0  P25 9  P75 28  P90 36  min −8  max 42
-┌────────────────────────────────────────────────────┐
-│  CHART (Chart.js, line+fill, stepped)              │
-│  [PDF | CDF toggle]  [Expand ⤢ button]             │
-│  Multiple series, hover tooltips, legend           │
-└────────────────────────────────────────────────────┘
+┌──────────────────────────┬──────────────────────────┐
+│  FORM (collapsible)       │  CODE — source of truth   │  ← .io-row
+│  [Examples…]              │  output twExpert(10) …    │
+│  [⚕ icon category row] ↓  │  output healSpell(3) …    │
+│   bandage plus flask sword│  (editable, monospace)    │
+│  [category-specific rows] │                           │
+└──────────────────────────┴──────────────────────────┘
+┌──────────────────────────────────────────────────────┐
+│  [PDF|CDF] [Side by side]  [zoom −/+/⟲ x:min–max]      │  ← .output-area
+│  [PNG CSV Share]                                       │
+│  stats table · CHART (Chart.js) · Compare two series   │
+└──────────────────────────────────────────────────────┘
 ```
+
+- **Category picker:** an icon-button row (`icons.js` inline SVG, themed via
+  `currentColor`) drives `#f-category`; the original `<select>` is kept visually-hidden as
+  an accessible fallback.
+- **Examples gallery:** an "Examples…" button opens a `<dialog>` of cards (title +
+  explanation + code preview + Load). Load appends the snippet to the Code panel.
+- **Zoom:** drag pans, wheel/pinch zoom (no drag-select box); x-axis locked.
 
 ---
 

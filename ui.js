@@ -1,10 +1,33 @@
 import { compare } from "./engine.js";
 import { evaluate, evalExpr } from "./expr.js";
+import { ICONS } from "./icons.js";
 import {
   renderChart, setChartMode, getChartMode, destroyChart,
   setGrouped, getGrouped, setQuantile, resetZoom, exportPNG,
   zoomBy, setXLimits,
 } from "./chart.js";
+
+// Examples gallery — ready-made expressions with a one-line explanation.
+const EXAMPLES = [
+  { title: "Strike vs level target", desc: "Attack roll vs a level-8 creature's AC.",
+    code: 'output pf2attack(+15, targetAC(8)) * (1d8+4) named "Strike vs L8"' },
+  { title: "Strike with Fortune", desc: "Roll the attack twice, keep the better (Hero Point).",
+    code: 'output pf2attackfortune(+15, targetAC(8)) * (1d8+4) named "Strike (fortune) vs L8"' },
+  { title: "Fireball (basic save)", desc: "Reflex save vs a level-8 target; half on success.",
+    code: 'output pf2save(28, targetSave(8)) * fireball(5) named "Fireball vs L8"' },
+  { title: "Fighter greatsword (L5)", desc: "2d6+4 greatsword strike vs a level-5 target.",
+    code: 'output pf2attack(+14, targetAC(5)) * (2d6+4) named "Fighter greatsword L5"' },
+  { title: "Rogue + sneak (L5)", desc: "Off-guard target (−2 AC) with +2d6 sneak attack.",
+    code: 'output pf2attack(+12, targetAC(5)-2) * (1d6+4 + 2d6) named "Rogue + sneak L5"' },
+  { title: "Barbarian rage (L5)", desc: "1d12+4 greataxe with +6 rage damage.",
+    code: 'output pf2attack(+14, targetAC(5)) * (1d12+4+6) named "Barbarian rage L5"' },
+  { title: "Electric Arc cantrip", desc: "Two-action electricity cantrip, basic save.",
+    code: 'output pf2save(22, targetSave(5)) * electricArc(3, 4) named "Electric Arc"' },
+  { title: "Persistent bleed", desc: "Total 1d6 persistent damage until a DC 15 flat check ends it.",
+    code: 'output persistent(1d6) named "Persistent 1d6 bleed"' },
+  { title: "Keep-higher d20", desc: "Roll 2d20 and keep the higher (advantage-style).",
+    code: 'output keephigh(2, 20) named "d20 with Fortune"' },
+];
 
 const COLORS = [
   "#D85A30","#185FA5","#1D9E75","#7F77DD",
@@ -205,18 +228,57 @@ function _updateCategoryRows() {
   document.getElementById("rows-heal").style.display   = cat === "heal"   ? "" : "none";
   document.getElementById("rows-potion").style.display = cat === "potion" ? "" : "none";
   document.getElementById("rows-attack").style.display = cat === "attack" ? "" : "none";
+  document.querySelectorAll(".cat-icon").forEach(b =>
+    b.classList.toggle("active", b.dataset.cat === cat));
   _updatePreview();
+}
+
+// Append a code line (reused by the form inserter + examples gallery).
+function _appendCode(line) {
+  const ta = _codeEl();
+  ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, "") + "\n" + line : line;
+  _evaluateAndRender();
 }
 
 function _insertSnippet() {
   const p     = _resolvePreset();
   const expr  = _formToExpr(p);
   const label = document.getElementById("f-label").value.trim() || _autoLabel(p);
-  const line  = `output ${expr} named "${label}"`;
-  const ta = _codeEl();
-  ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, "") + "\n" + line : line;
   document.getElementById("f-label").value = "";
-  _evaluateAndRender();
+  _appendCode(`output ${expr} named "${label}"`);
+}
+
+function _initExamples() {
+  const dialog = document.getElementById("examples-dialog");
+  const grid   = document.getElementById("examples-grid");
+  const open   = document.getElementById("btn-examples");
+  const close  = document.getElementById("examples-close");
+  if (!dialog || !grid || !open) return;
+
+  grid.innerHTML = EXAMPLES.map((ex, i) => `
+    <div class="example-card">
+      <h3>${_esc(ex.title)}</h3>
+      <p>${_esc(ex.desc)}</p>
+      <code>${_esc(ex.code)}</code>
+      <button type="button" class="btn-ghost" data-ex="${i}">Load</button>
+    </div>`).join("");
+
+  grid.addEventListener("click", e => {
+    const btn = e.target.closest("button[data-ex]");
+    if (!btn) return;
+    _appendCode(EXAMPLES[+btn.dataset.ex].code);
+    dialog.close();
+  });
+
+  open.addEventListener("click", () => dialog.showModal());
+  close?.addEventListener("click", () => dialog.close());
+  // click on backdrop closes
+  dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
+}
+
+function _esc(s) {
+  return String(s).replace(/[&<>"]/g, c =>
+    ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
 // ── Persistence ──────────────────────────────────────────────────────────────
@@ -288,7 +350,7 @@ function _refreshScenarioList() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "stacked-1";
+  if (typeof window !== "undefined") window.__pf2dice_build = "gallery-1";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -300,7 +362,20 @@ export function initUI() {
   // Category + preview wiring
   const cat = document.getElementById("f-category");
   cat.addEventListener("change", _updateCategoryRows);
+
+  // Category icon buttons drive #f-category (select stays as fallback)
+  document.querySelectorAll(".cat-icon").forEach(btn => {
+    const ico = btn.querySelector(".cat-ico");
+    if (ico) ico.innerHTML = ICONS[btn.dataset.cat] || "";
+    btn.addEventListener("click", () => {
+      cat.value = btn.dataset.cat;
+      _updateCategoryRows();
+    });
+  });
   _updateCategoryRows();
+
+  // Examples gallery
+  _initExamples();
 
   ["f-tw-tier","f-mod","f-rank","f-rs","f-potion-tier",
    "f-atk","f-ac","f-ndice","f-dsize","f-dmgbonus",
