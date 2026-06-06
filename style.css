@@ -342,6 +342,51 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 .btn-mode:hover { border-color: var(--accent); color: var(--accent); }
 .btn-mode.active { border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
+/* ── Quantile control ── */
+
+.quantile-control {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-left: 8px;
+  flex-wrap: wrap;
+}
+
+.quantile-label { display: none; }
+
+#quantile-num {
+  width: 72px;
+  padding: 3px 6px;
+  font-size: 0.82rem;
+  text-align: center;
+}
+
+#quantile-slider {
+  width: 110px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.quantile-hits {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.q-hit {
+  font-size: 0.78rem;
+  padding: 2px 7px;
+  border-radius: 3px;
+  border: 1px solid;
+  color: var(--text);
+  display: flex;
+  gap: 5px;
+  align-items: center;
+}
+
+.q-hit-label { color: var(--text-dim); }
+.q-hit b     { color: var(--text); }
+
 /* ── Stats bar ── */
 
 .stats-bar { display: flex; flex-direction: column; gap: 4px; }

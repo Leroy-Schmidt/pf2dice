@@ -3,7 +3,7 @@ import {
   healSpell, potionMinor, potionLesser, potionModerate, potionGreater,
   strike,
 } from "./presets.js";
-import { renderChart, setChartMode, getChartMode, destroyChart, setGrouped, getGrouped } from "./chart.js";
+import { renderChart, setChartMode, getChartMode, destroyChart, setGrouped, getGrouped, setQuantile } from "./chart.js";
 import { generateCode } from "./codegen.js";
 
 const COLORS = [
@@ -271,12 +271,70 @@ export function initUI() {
     setChartMode("pdf"); destroyChart(); _refresh();
     btnPdf.classList.add("active"); btnCdf.classList.remove("active");
     btnGrouped.style.display = "";
+    quantileControl.style.display = "none";
   });
   btnCdf.addEventListener("click", () => {
     setChartMode("cdf"); destroyChart(); _refresh();
     btnCdf.classList.add("active"); btnPdf.classList.remove("active");
     btnGrouped.style.display = "none";
+    quantileControl.style.display = "";
+    _updateQuantile();
   });
+  // Quantile slider (CDF only)
+  const quantileControl = document.getElementById("quantile-control");
+  const quantileSlider  = document.getElementById("quantile-slider");
+  const quantileNum     = document.getElementById("quantile-num");
+  const quantileHits    = document.getElementById("quantile-hits");
+
+  function _updateQuantile() {
+    const q = Math.max(0.001, Math.min(0.999, parseFloat(quantileSlider.value) || 0.5));
+    quantileSlider.value = q;
+    quantileNum.value    = q;
+    setQuantile(q);
+
+    // Compute interpolated intersection for each visible series
+    const hits = _series
+      .filter(s => s.visible)
+      .map(s => {
+        const dist = _buildDist(s);
+        const { xs, ys } = dist.toCDF();
+        // Find first index where CDF >= q
+        let x = xs[xs.length - 1];
+        for (let i = 0; i < ys.length; i++) {
+          if (ys[i] >= q) {
+            // Interpolate between i-1 and i
+            if (i === 0) { x = xs[0]; break; }
+            const y0 = ys[i - 1], y1 = ys[i];
+            const x0 = xs[i - 1], x1 = xs[i];
+            x = x0 + (q - y0) / (y1 - y0) * (x1 - x0);
+            break;
+          }
+        }
+        return { label: s.label, color: s.color, x };
+      });
+
+    quantileHits.innerHTML = hits.map(h =>
+      `<span class="q-hit" style="border-color:${h.color}">
+        <span class="q-hit-label">${h.label}</span>
+        <b>${h.x.toFixed(1)}</b>
+      </span>`
+    ).join("");
+
+    renderChart(_series.map(s => {
+      const dist = _buildDist(s);
+      dist.label   = s.label;
+      dist.color   = s.color;
+      dist.visible = s.visible;
+      return dist;
+    }));
+  }
+
+  quantileSlider.addEventListener("input", _updateQuantile);
+  quantileNum.addEventListener("input", () => {
+    quantileSlider.value = quantileNum.value;
+    _updateQuantile();
+  });
+
   btnGrouped.addEventListener("click", () => {
     const g = !getGrouped();
     setGrouped(g);

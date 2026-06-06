@@ -6,6 +6,7 @@
   <title>PF2Dice</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-annotation@3.1.0/dist/chartjs-plugin-annotation.min.js"></script>
   <script>
     (function() {
       const t = localStorage.getItem("pf2dice-theme") || "dark";
@@ -202,6 +203,11 @@
       <button id="btn-pdf" class="btn-mode active">PDF</button>
       <button id="btn-cdf" class="btn-mode">CDF</button>
       <button id="btn-grouped" class="btn-mode" title="Only applies to PDF">Side by side</button>
+      <div id="quantile-control" class="quantile-control" style="display:none">
+        <input type="number" id="quantile-num" min="0" max="1" value="0.5" step="0.01">
+        <input type="range"  id="quantile-slider" min="0" max="1" value="0.5" step="0.001">
+        <div id="quantile-hits" class="quantile-hits"></div>
+      </div>
     </div>
     <div id="stats-bar" class="stats-bar"></div>
     <div class="chart-wrap">
