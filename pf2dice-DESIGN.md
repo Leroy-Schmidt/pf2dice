@@ -467,7 +467,12 @@ d(n)                         uniform die 1..n
 const(k)                     point mass at k
 pf2attack(mod, dc)           degree dist, mults {cf:0, f:0, s:1, cs:2}
 pf2save(dc, saveMod)         degree dist, mults {cf:2, f:1, s:0.5, cs:0} (basic save)
+pf2attackfortune(mod, dc)    as pf2attack, Fortune (roll d20 twice keep higher)
+pf2savefortune(dc, saveMod)  as pf2save, Fortune
 pf2roll(mod, dc, cf,f,s,cs)  degree dist, fully custom mults
+keephigh(n, faces)           highest of n d(faces)  (advantage-style)
+keeplow(n, faces)            lowest of n d(faces)
+persistent(dmg, flatDC=15)   total persistent damage until flat check passes (geometric, exact)
 twTrained/Expert/Master/Legendary(mod [, rs])
 healSpell(rank)
 potionMinor/Lesser/Moderate/Greater()

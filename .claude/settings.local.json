@@ -3,7 +3,11 @@
     "allow": [
       "WebFetch(domain:cdn.jsdelivr.net)",
       "Bash(git add *)",
-      "Bash(git commit -m ' *)"
+      "Bash(git commit -m ' *)",
+      "Bash(node test-node.mjs)",
+      "Bash(command -v node.exe)",
+      "Read(//c/Users/Nutzer/AppData/Roaming/**)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }

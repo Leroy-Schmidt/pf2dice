@@ -352,6 +352,27 @@
     const prog = evaluate('gs = pf2attack(+9,20) * (2d6+4)\noutput gs named "Greatsword"\noutput twExpert(12)');
     const e4ok = prog.errors.length === 0 && prog.series.length === 2 && prog.series[0].label === "Greatsword";
     console[e4ok ? "log" : "error"](`${e4ok ? "PASS" : "FAIL"}: statement layer (series=${prog.series.length}, errors=${prog.errors.length})`);
+
+    // primitives: persistent(d6) mean == E[d6]/p = 3.5/0.3 = 11.6667
+    const pm = evalExpr("persistent(d6)").ev();
+    const pmok = Math.abs(pm - 3.5 / 0.3) < 1e-6;
+    console[pmok ? "log" : "error"](`${pmok ? "PASS" : "FAIL"}: persistent(d6) mean (${pm.toFixed(4)} == 11.6667)`);
+
+    // primitives: keephigh(2,20) mean == 13.825
+    const kh = evalExpr("keephigh(2, 20)").ev();
+    const khok = Math.abs(kh - 13.825) < 1e-6;
+    console[khok ? "log" : "error"](`${khok ? "PASS" : "FAIL"}: keephigh(2,20) mean (${kh.toFixed(4)} == 13.825)`);
+
+    // primitives: keeplow(2,20) mean == 7.175 (symmetric with keephigh)
+    const kl = evalExpr("keeplow(2, 20)").ev();
+    const klok = Math.abs(kl - 7.175) < 1e-6;
+    console[klok ? "log" : "error"](`${klok ? "PASS" : "FAIL"}: keeplow(2,20) mean (${kl.toFixed(4)} == 7.175)`);
+
+    // primitives: fortune attack mean >= normal attack mean (same params)
+    const fAtk = evalExpr("pf2attackfortune(+5, 20) * (2d6+5)").ev();
+    const nAtk = evalExpr("pf2attack(+5, 20) * (2d6+5)").ev();
+    const fok = fAtk >= nAtk - 1e-9;
+    console[fok ? "log" : "error"](`${fok ? "PASS" : "FAIL"}: fortune >= normal (${fAtk.toFixed(3)} >= ${nAtk.toFixed(3)})`);
   }
 </script>
 

@@ -247,8 +247,50 @@ function runTests() {
   console.log(`\n${passed} passed, ${failed} failed`);
 }
 
-if (new URLSearchParams(window.location.search).get("test") === "1") {
+if (typeof window !== "undefined" &&
+    new URLSearchParams(window.location.search).get("test") === "1") {
   runTests();
+}
+
+function keepHigh(n, faces) {
+  // Distribution of the highest of n independent d(faces).
+  const m = new Map();
+  const denom = Math.pow(faces, n);
+  for (let x = 1; x <= faces; x++) {
+    m.set(x, (Math.pow(x, n) - Math.pow(x - 1, n)) / denom);
+  }
+  return new Dist(m);
+}
+
+function keepLow(n, faces) {
+  // Distribution of the lowest of n independent d(faces).
+  const m = new Map();
+  const denom = Math.pow(faces, n);
+  for (let x = 1; x <= faces; x++) {
+    const hiTail = faces - x + 1; // count of faces >= x
+    m.set(x, (Math.pow(hiTail, n) - Math.pow(hiTail - 1, n)) / denom);
+  }
+  return new Dist(m);
+}
+
+function persistentDamage(dmg, flatDC = 15) {
+  // PF2e persistent damage: deal dmg, then attempt a flat check to end it; repeat.
+  // Number of ticks N ~ Geometric(p), p = chance to pass the flat check.
+  // Returns the exact distribution of total damage = mixture over k of (dmg convolved k times).
+  const dcClamped = Math.max(2, Math.min(20, flatDC));
+  const p = (21 - dcClamped) / 20; // success chance per check (DC15 -> 0.30)
+  const acc = new Map();
+  let running = dmg;     // total after k ticks (k = 1 -> one tick)
+  let tail = 1;          // (1 - p)^(k-1)
+  let k = 1;
+  while (tail * p > 1e-12 && k < 2000) {
+    const pk = tail * p; // P(N = k)
+    for (const [v, pr] of running.map) acc.set(v, (acc.get(v) ?? 0) + pr * pk);
+    running = running.add(dmg);
+    tail *= (1 - p);
+    k++;
+  }
+  return new Dist(acc);
 }
 
 function compare(distA, distB) {
@@ -270,4 +312,4 @@ function compare(distA, distB) {
   };
 }
 
-export { Dist, d, pf2roll, pf2damage, degreesOfSuccess, compare };
+export { Dist, d, pf2roll, pf2damage, degreesOfSuccess, compare, keepHigh, keepLow, persistentDamage };

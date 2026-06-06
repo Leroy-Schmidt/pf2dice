@@ -1,7 +1,7 @@
 // Expression engine for PF2Dice (design doc §16).
 // Evaluates expressions like:  pf2attack(+5, 20) * (2d6 + 5)
 // Dependency order: engine → presets → expr → ...
-import { Dist, d, degreesOfSuccess } from "./engine.js";
+import { Dist, d, degreesOfSuccess, keepHigh, keepLow, persistentDamage } from "./engine.js";
 import {
   twTrained, twExpert, twMaster, twLegendary,
   healSpell, potionMinor, potionLesser, potionModerate, potionGreater,
@@ -145,11 +145,16 @@ function asScalar(dist) {
   return [...dist.map.keys()][0];
 }
 
-function degreeDist(mod, dc, mults) {
+// faceProb(roll) gives the probability of the kept d20 face being `roll`.
+// Default: fair 1/20. Fortune (keep higher of 2): (2k-1)/400.
+const FAIR    = () => 1 / 20;
+const FORTUNE = k => (2 * k - 1) / 400;
+
+function degreeDist(mod, dc, mults, faceProb = FAIR) {
   const m = new Map();
   for (let roll = 1; roll <= 20; roll++) {
     const val = mults[degreesOfSuccess(roll, mod, dc)];
-    m.set(val, (m.get(val) ?? 0) + 1 / 20);
+    m.set(val, (m.get(val) ?? 0) + faceProb(roll));
   }
   const dist = new Dist(m);
   dist.isDegree = true;
@@ -183,9 +188,14 @@ const FUNCS = {
   const:      a => Dist.const(asScalar(a)),
   pf2attack:  (mod, dc) => degreeDist(asScalar(mod), asScalar(dc), [0, 0, 1, 2]),
   pf2save:    (dc, saveMod) => degreeDist(asScalar(saveMod), asScalar(dc), [2, 1, 0.5, 0]),
+  pf2attackfortune: (mod, dc) => degreeDist(asScalar(mod), asScalar(dc), [0, 0, 1, 2], FORTUNE),
+  pf2savefortune:   (dc, saveMod) => degreeDist(asScalar(saveMod), asScalar(dc), [2, 1, 0.5, 0], FORTUNE),
   pf2roll:    (mod, dc, cf, f, s, cs) =>
                 degreeDist(asScalar(mod), asScalar(dc),
                   [asScalar(cf), asScalar(f), asScalar(s), asScalar(cs)]),
+  keephigh:   (n, faces) => keepHigh(asScalar(n), asScalar(faces)),
+  keeplow:    (n, faces) => keepLow(asScalar(n), asScalar(faces)),
+  persistent: (dmg, dc) => persistentDamage(dmg, dc ? asScalar(dc) : 15),
   twTrained:   (mod, rs) => twTrained(asScalar(mod), rs ? !!asScalar(rs) : false),
   twExpert:    (mod, rs) => twExpert(asScalar(mod), rs ? !!asScalar(rs) : false),
   twMaster:    (mod, rs) => twMaster(asScalar(mod), rs ? !!asScalar(rs) : false),

@@ -1,0 +1,10 @@
+{
+  "name": "pf2dice",
+  "version": "0.2.0",
+  "description": "Pathfinder 2e exact dice probability calculator (static, no build step).",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node test-node.mjs"
+  }
+}
