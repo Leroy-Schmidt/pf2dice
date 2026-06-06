@@ -7,7 +7,9 @@
       "Bash(node test-node.mjs)",
       "Bash(command -v node.exe)",
       "Read(//c/Users/Nutzer/AppData/Roaming/**)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "WebSearch",
+      "WebFetch(domain:2e.aonprd.com)"
     ]
   }
 }

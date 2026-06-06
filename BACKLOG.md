@@ -26,12 +26,12 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Doc §16.5 updated
 - [x] Node-safe modules + headless verification (preview_eval; Node test file kept for when node exists)
 
-### 2. Content presets
-- [ ] Creature-level target table → `targetAC(level)`, `targetDC(level)` (level-based DCs)
-- [ ] Class/weapon strike presets (Fighter, Rogue w/ sneak dice, Barbarian rage, ranged)
-- [ ] Spell/cantrip library (Electric Arc, Fireball, …) scaling by rank
-- [ ] Form: a "Library" category exposing these; inserts code
-- [ ] Self-tests for representative presets
+### 2. Content presets  ✅ done
+- [x] Creature-level target tables → `targetAC(level)`, `targetSave(level)`, `levelDC(level)` (authoritative GM Core / AoN values)
+- [x] Class/weapon strike sample snippets (Fighter, Rogue w/ sneak, Barbarian rage)
+- [x] Spell/cantrip damage helpers (`fireball(rank)`, `electricArc(rank,mod)`)
+- [x] Form: "Snippets" inserter (low-clutter dropdown → appends code)
+- [x] Self-tests (target tables, fireball/electricArc means, all snippets evaluate clean)
 
 ### 3. Quality of life
 - [ ] Export chart as PNG

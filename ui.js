@@ -280,6 +280,15 @@ export function initUI() {
     _updatePreview();
   });
 
+  // Snippet inserter
+  document.getElementById("btn-snippet")?.addEventListener("click", () => {
+    const snip = document.getElementById("f-snippet").value;
+    if (!snip) return;
+    const ta = _codeEl();
+    ta.value = ta.value.trim() ? ta.value.replace(/\s*$/, "") + "\n" + snip : snip;
+    _evaluateAndRender();
+  });
+
   // Insert / clear
   document.getElementById("btn-add").addEventListener("click", _insertSnippet);
   document.getElementById("btn-clear")?.addEventListener("click", () => {

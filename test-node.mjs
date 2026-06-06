@@ -7,6 +7,7 @@ import {
   strike, strikeRoutine, singleStrike,
 } from "./presets.js";
 import { evalExpr, evaluate } from "./expr.js";
+import { targetAC, targetSave, levelDC, fireball, electricArc } from "./library.js";
 
 let pass = 0, fail = 0;
 const near = (a, b, t = 1e-6) => Math.abs(a - b) < t;
@@ -48,6 +49,17 @@ check("keeplow(2,20) mean", near(keepLow(2, 20).ev(), 7.175), `${keepLow(2, 20).
 check("expr persistent(d6,15)", near(evalExpr("persistent(d6, 15)").ev(), 3.5 / 0.3));
 check("fortune >= normal", evalExpr("pf2attackfortune(+5,20)*(2d6+5)").ev() >= evalExpr("pf2attack(+5,20)*(2d6+5)").ev() - 1e-9);
 check("keephigh/keeplow sum to 2*mean", near(keepHigh(2, 20).ev() + keepLow(2, 20).ev(), 21));
+
+// ── Content library ──
+check("targetAC(5)=21", targetAC(5) === 21);
+check("targetAC(8)=26", targetAC(8) === 26);
+check("targetSave(5)=12", targetSave(5) === 12);
+check("levelDC(5)=20", levelDC(5) === 20);
+check("levelDC(12)=30", levelDC(12) === 30);
+check("fireball(3) mean 21", near(fireball(3).ev(), 21));
+check("fireball(5) mean 35", near(fireball(5).ev(), 35));
+check("electricArc(3,4) mean 11.5", near(electricArc(3, 4).ev(), 11.5));
+check("expr targetAC == literal", near(evalExpr("pf2attack(+15, targetAC(8)) * (1d8+4)").ev(), evalExpr("pf2attack(+15, 26) * (1d8+4)").ev()));
 
 console.log(`\n${pass} passed, ${fail} failed`);
 process.exit(fail === 0 ? 0 : 1);

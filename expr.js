@@ -7,6 +7,7 @@ import {
   healSpell, potionMinor, potionLesser, potionModerate, potionGreater,
   strike, strikeRoutine,
 } from "./presets.js";
+import { targetAC, targetSave, levelDC, fireball, electricArc } from "./library.js";
 
 // ── Tokenizer ──────────────────────────────────────────────────────────────
 
@@ -196,6 +197,12 @@ const FUNCS = {
   keephigh:   (n, faces) => keepHigh(asScalar(n), asScalar(faces)),
   keeplow:    (n, faces) => keepLow(asScalar(n), asScalar(faces)),
   persistent: (dmg, dc) => persistentDamage(dmg, dc ? asScalar(dc) : 15),
+  // Content library
+  targetAC:   lvl => Dist.const(targetAC(asScalar(lvl))),
+  targetSave: lvl => Dist.const(targetSave(asScalar(lvl))),
+  levelDC:    lvl => Dist.const(levelDC(asScalar(lvl))),
+  fireball:   rank => fireball(asScalar(rank)),
+  electricArc: (rank, mod) => electricArc(asScalar(rank), mod ? asScalar(mod) : 0),
   twTrained:   (mod, rs) => twTrained(asScalar(mod), rs ? !!asScalar(rs) : false),
   twExpert:    (mod, rs) => twExpert(asScalar(mod), rs ? !!asScalar(rs) : false),
   twMaster:    (mod, rs) => twMaster(asScalar(mod), rs ? !!asScalar(rs) : false),

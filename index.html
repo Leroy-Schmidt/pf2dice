@@ -38,6 +38,31 @@
     <div class="sidebar-inner">
 
       <section class="panel">
+        <h2>Snippets</h2>
+        <label>Insert a ready-made example
+          <select id="f-snippet">
+            <option value="">— choose —</option>
+            <optgroup label="Target by level (Moderate)">
+              <option value='output pf2attack(+15, targetAC(8)) * (1d8+4) named "Strike vs L8"'>Strike vs level target</option>
+              <option value='output pf2attackfortune(+15, targetAC(8)) * (1d8+4) named "Strike (fortune) vs L8"'>Strike with Fortune vs target</option>
+              <option value='output pf2save(28, targetSave(8)) * fireball(5) named "Fireball vs L8"'>Save spell vs level target</option>
+            </optgroup>
+            <optgroup label="Sample class builds">
+              <option value='output pf2attack(+14, targetAC(5)) * (2d6+4) named "Fighter greatsword L5"'>Fighter greatsword (L5)</option>
+              <option value='output pf2attack(+12, targetAC(5)-2) * (1d6+4 + 2d6) named "Rogue + sneak L5"'>Rogue strike + sneak (L5, off-guard)</option>
+              <option value='output pf2attack(+14, targetAC(5)) * (1d12+4+6) named "Barbarian rage L5"'>Barbarian greataxe rage (L5)</option>
+            </optgroup>
+            <optgroup label="Spells & effects">
+              <option value='output pf2save(22, targetSave(5)) * electricArc(3, 4) named "Electric Arc"'>Electric Arc cantrip (L5)</option>
+              <option value='output persistent(1d6) named "Persistent 1d6 bleed"'>Persistent 1d6 bleed</option>
+              <option value='output keephigh(2, 20) named "d20 with Fortune"'>Keep-higher d20</option>
+            </optgroup>
+          </select>
+        </label>
+        <button id="btn-snippet" class="btn-ghost">Insert snippet</button>
+      </section>
+
+      <section class="panel">
         <h2>Add series</h2>
 
         <!-- Category -->
