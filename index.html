@@ -6,91 +6,264 @@
   <title>PF2Dice</title>
   <link rel="stylesheet" href="style.css">
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js"></script>
+  <script>
+    (function() {
+      const t = localStorage.getItem("pf2dice-theme") || "dark";
+      document.documentElement.setAttribute("data-theme", t);
+    })();
+  </script>
 </head>
 <body>
 
 <header>
   <h1>PF2Dice</h1>
   <span class="subtitle">Pathfinder 2e dice probability calculator</span>
+  <div class="header-right">
+    <div class="theme-switcher">
+      <button class="theme-btn" data-theme="dark"      title="Dark"></button>
+      <button class="theme-btn" data-theme="light"     title="Light"></button>
+      <button class="theme-btn" data-theme="parchment" title="Parchment"></button>
+    </div>
+  </div>
 </header>
 
-<main>
-  <div class="top-pane">
+<div class="app-layout">
 
-    <!-- Form panel -->
-    <section class="form-panel" id="form-panel">
-      <h2>Add series</h2>
+  <!-- Left sidebar: Form — toggle FIRST so it stays visible when collapsed -->
+  <aside class="sidebar sidebar-left" id="sidebar-left">
+    <button class="sidebar-toggle" id="toggle-left" title="Toggle form">&#8249;</button>
+    <div class="sidebar-inner">
 
-      <label>Preset
-        <select id="f-preset"></select>
-      </label>
+      <section class="panel">
+        <h2>Add series</h2>
 
-      <div id="row-mod">
-        <label>Medicine modifier
-          <input type="number" id="f-mod" value="10" min="-10" max="40">
+        <!-- Category -->
+        <label>Category
+          <select id="f-category">
+            <option value="tw">Treat Wounds</option>
+            <option value="heal">Heal Spell</option>
+            <option value="potion">Potion</option>
+            <option value="attack">Attack / Strike</option>
+          </select>
         </label>
-      </div>
 
-      <div id="row-rank">
-        <label>Spell rank
-          <input type="number" id="f-rank" value="3" min="1" max="10">
+        <!-- TW options -->
+        <div id="rows-tw">
+          <label>Proficiency
+            <select id="f-tw-tier">
+              <option value="twTrained">Trained (DC 15)</option>
+              <option value="twExpert" selected>Expert (DC 20)</option>
+              <option value="twMaster">Master (DC 30)</option>
+              <option value="twLegendary">Legendary (DC 40)</option>
+            </select>
+          </label>
+          <label>Medicine modifier
+            <input type="number" id="f-mod" value="10" min="-10" max="40">
+          </label>
+          <div class="quickpick">
+            <span class="quickpick-label">Quick:</span>
+            <button class="qp" data-mod="5">+5</button>
+            <button class="qp" data-mod="10">+10</button>
+            <button class="qp" data-mod="12">+12</button>
+            <button class="qp" data-mod="15">+15</button>
+            <button class="qp" data-mod="18">+18</button>
+            <button class="qp" data-mod="20">+20</button>
+          </div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="f-rs"> Risky Surgery
+          </label>
+          <p class="hint">+2 bonus · every Success → Crit · costs 1d8</p>
+        </div>
+
+        <!-- Heal spell options -->
+        <div id="rows-heal" style="display:none">
+          <label>Spell rank
+            <input type="number" id="f-rank" value="3" min="1" max="10">
+          </label>
+          <div class="quickpick">
+            <span class="quickpick-label">Quick:</span>
+            <button class="qp" data-rank="1">1</button>
+            <button class="qp" data-rank="3">3</button>
+            <button class="qp" data-rank="5">5</button>
+            <button class="qp" data-rank="7">7</button>
+            <button class="qp" data-rank="9">9</button>
+          </div>
+        </div>
+
+        <!-- Attack options -->
+        <div id="rows-attack" style="display:none">
+          <label>Weapon preset
+            <select id="f-weapon">
+              <option value="">— custom —</option>
+              <optgroup label="Simple">
+                <option value="1|4">Dagger (1d4)</option>
+                <option value="1|6">Club / Shortbow (1d6)</option>
+              </optgroup>
+              <optgroup label="Martial — one-handed">
+                <option value="1|6">Shortsword / Rapier (1d6)</option>
+                <option value="1|8">Longsword / Warhammer / Battleaxe (1d8)</option>
+                <option value="1|10">Falchion / Halberd (1d10)</option>
+              </optgroup>
+              <optgroup label="Martial — two-handed">
+                <option value="1|12">Greatsword / Greataxe (1d12)</option>
+              </optgroup>
+              <optgroup label="Ranged">
+                <option value="1|8">Longbow (1d8)</option>
+              </optgroup>
+            </select>
+          </label>
+          <div class="two-col">
+            <label>Dice count
+              <input type="number" id="f-ndice" value="1" min="1" max="8">
+            </label>
+            <label>Die size
+              <select id="f-dsize">
+                <option value="4">d4</option>
+                <option value="6">d6</option>
+                <option value="8" selected>d8</option>
+                <option value="10">d10</option>
+                <option value="12">d12</option>
+              </select>
+            </label>
+          </div>
+          <div class="quickpick">
+            <span class="quickpick-label">Striking rune:</span>
+            <button class="qp" data-striking="1">None (1 die)</button>
+            <button class="qp" data-striking="2">+1 (2 dice)</button>
+            <button class="qp" data-striking="3">+2 (3 dice)</button>
+          </div>
+          <label>Damage bonus
+            <input type="number" id="f-dmgbonus" value="4" min="0" max="30">
+          </label>
+          <div class="quickpick">
+            <span class="quickpick-label">Quick:</span>
+            <button class="qp" data-dmg="0">+0</button>
+            <button class="qp" data-dmg="4">+4</button>
+            <button class="qp" data-dmg="6">+6</button>
+            <button class="qp" data-dmg="8">+8</button>
+          </div>
+          <label>Attack modifier
+            <input type="number" id="f-atk" value="10" min="-5" max="40">
+          </label>
+          <div class="quickpick">
+            <span class="quickpick-label">Quick:</span>
+            <button class="qp" data-atk="5">+5</button>
+            <button class="qp" data-atk="8">+8</button>
+            <button class="qp" data-atk="10">+10</button>
+            <button class="qp" data-atk="15">+15</button>
+            <button class="qp" data-atk="20">+20</button>
+          </div>
+          <label>Target AC
+            <input type="number" id="f-ac" value="18" min="5" max="50">
+          </label>
+          <div class="quickpick">
+            <span class="quickpick-label">Quick:</span>
+            <button class="qp" data-ac="14">14</button>
+            <button class="qp" data-ac="18">18</button>
+            <button class="qp" data-ac="22">22</button>
+            <button class="qp" data-ac="26">26</button>
+            <button class="qp" data-ac="30">30</button>
+          </div>
+        </div>
+
+        <!-- Potion options -->
+        <div id="rows-potion" style="display:none">
+          <label>Potion type
+            <select id="f-potion-tier">
+              <option value="potionMinor">Minor (2d8+5)</option>
+              <option value="potionLesser">Lesser (3d8+10)</option>
+              <option value="potionModerate">Moderate (4d8+15)</option>
+              <option value="potionGreater">Greater (6d8+25)</option>
+            </select>
+          </label>
+        </div>
+
+        <label>Label (optional)
+          <input type="text" id="f-label" placeholder="auto">
         </label>
-      </div>
 
-      <div id="row-rs">
-        <label class="checkbox-label">
-          <input type="checkbox" id="f-rs"> Risky Surgery
-        </label>
-      </div>
+        <div id="preview-ev" class="ev-preview"></div>
 
-      <label>Label (optional)
-        <input type="text" id="f-label" placeholder="auto">
-      </label>
+        <button id="btn-add" class="btn-primary">+ Add series</button>
+      </section>
 
-      <button id="btn-add" class="btn-primary">+ Add series</button>
+      <section class="panel">
+        <h2>Series</h2>
+        <div id="series-list"></div>
+        <button id="btn-clear" class="btn-ghost">Clear all</button>
+      </section>
 
-      <h2>Series</h2>
-      <div id="series-list"></div>
-    </section>
+    </div>
+  </aside>
 
-    <!-- Code panel -->
-    <section class="code-panel">
-      <h2>Expression</h2>
-      <pre id="code-panel"></pre>
-    </section>
+  <!-- Main: chart -->
+  <main class="main-area">
+    <div class="chart-toolbar">
+      <button id="btn-pdf" class="btn-mode active">PDF</button>
+      <button id="btn-cdf" class="btn-mode">CDF</button>
+      <button id="btn-grouped" class="btn-mode" title="Only applies to PDF">Side by side</button>
+    </div>
+    <div id="stats-bar" class="stats-bar"></div>
+    <div class="chart-wrap">
+      <canvas id="chart"></canvas>
+    </div>
+  </main>
 
-  </div>
+  <!-- Right sidebar: Code — toggle FIRST -->
+  <aside class="sidebar sidebar-right" id="sidebar-right">
+    <button class="sidebar-toggle" id="toggle-right" title="Toggle code">&#8250;</button>
+    <div class="sidebar-inner">
+      <section class="panel">
+        <h2>Expression</h2>
+        <pre id="code-panel"></pre>
+      </section>
+    </div>
+  </aside>
 
-  <!-- Stats bar -->
-  <div id="stats-bar" class="stats-bar"></div>
-
-  <!-- Chart -->
-  <div class="chart-controls">
-    <button id="btn-pdf" class="btn-mode">PDF</button>
-    <button id="btn-cdf" class="btn-mode">CDF</button>
-  </div>
-  <div class="chart-wrap">
-    <canvas id="chart"></canvas>
-  </div>
-</main>
+</div>
 
 <script type="module">
   import { initUI } from "./ui.js";
   initUI();
+
+  // Theme
+  function applyTheme(t) {
+    document.documentElement.setAttribute("data-theme", t);
+    localStorage.setItem("pf2dice-theme", t);
+    document.querySelectorAll(".theme-btn").forEach(b =>
+      b.classList.toggle("active", b.dataset.theme === t)
+    );
+  }
+  applyTheme(localStorage.getItem("pf2dice-theme") || "dark");
+  document.querySelectorAll(".theme-btn").forEach(b =>
+    b.addEventListener("click", () => applyTheme(b.dataset.theme))
+  );
+
+  // Sidebar collapse
+  ["left", "right"].forEach(side => {
+    const sidebar = document.getElementById(`sidebar-${side}`);
+    const btn     = document.getElementById(`toggle-${side}`);
+    const key     = `pf2dice-sidebar-${side}`;
+    if (localStorage.getItem(key) === "1") sidebar.classList.add("collapsed");
+    btn.addEventListener("click", () => {
+      sidebar.classList.toggle("collapsed");
+      localStorage.setItem(key, sidebar.classList.contains("collapsed") ? "1" : "0");
+    });
+  });
 </script>
 
-<!-- Engine self-tests: ?test=1 -->
+<!-- Self-tests: ?test=1 -->
 <script type="module">
   import "./engine.js";
   import { twTrained, twExpert, twMaster, twLegendary, healSpell } from "./presets.js";
   if (new URLSearchParams(window.location.search).get("test") === "1") {
     const checks = [
-      ["twExpert(10)",       twExpert(10).ev(),        10.675],
-      ["twExpert(10) RS",    twExpert(10, true).ev(),  13.475],
-      ["twTrained(5)",       twTrained(5).ev(),         5.175],
-      ["twMaster(18)",       twMaster(18).ev(),        17.55],
-      ["healSpell(1)",       healSpell(1).ev(),         12.5],
-      ["healSpell(3)",       healSpell(3).ev(),         37.5],
+      ["twExpert(10)",    twExpert(10).ev(),       10.675],
+      ["twExpert(10) RS", twExpert(10, true).ev(), 13.475],
+      ["twTrained(5)",    twTrained(5).ev(),         5.175],
+      ["twMaster(18)",    twMaster(18).ev(),        17.55],
+      ["healSpell(1)",    healSpell(1).ev(),         12.5],
+      ["healSpell(3)",    healSpell(3).ev(),         37.5],
     ];
     for (const [name, got, want] of checks) {
       const ok = Math.abs(got - want) < 1e-4;

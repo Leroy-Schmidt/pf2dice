@@ -105,6 +105,29 @@ export function strikeBasic(mod, dc, damageDist) {
   return dist;
 }
 
+export function strike(attackMod, targetAC, numDice, dieSize, bonus = 0) {
+  // Standard PF2e strike: miss=0, hit=full, crit=double damage + 2x bonus
+  // On crit: double all dice + double bonus (PF2e doubling rules)
+  let baseDist = Dist.const(bonus);
+  for (let i = 0; i < numDice; i++) baseDist = baseDist.add(d(dieSize));
+
+  const probs = [0, 0, 0, 0];
+  for (let roll = 1; roll <= 20; roll++) probs[degreesOfSuccess(roll, attackMod, targetAC)] += 1/20;
+
+  // Crit: double dice + double bonus
+  let critDist = Dist.const(bonus * 2);
+  for (let i = 0; i < numDice * 2; i++) critDist = critDist.add(d(dieSize));
+
+  const dist = new Dist(new Map()).weightedSum([
+    [Dist.const(0), probs[0] + probs[1]], // miss + crit miss
+    [baseDist,      probs[2]],             // hit
+    [critDist,      probs[3]],             // crit
+  ]);
+  dist.label = `Strike +${attackMod} vs AC${targetAC} (${numDice}d${dieSize}+${bonus})`;
+  dist.color = "#E24B4A";
+  return dist;
+}
+
 export function saveSpell(dc, enemyMod, damageDist) {
   // PF2e save: cs=0, s=half, f=full, cf=double
   const probs = [0, 0, 0, 0];
