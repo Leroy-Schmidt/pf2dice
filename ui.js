@@ -3,6 +3,7 @@ import { evaluate, evalExpr } from "./expr.js";
 import {
   renderChart, setChartMode, getChartMode, destroyChart,
   setGrouped, getGrouped, setQuantile, resetZoom, exportPNG,
+  zoomBy, setXLimits,
 } from "./chart.js";
 
 const COLORS = [
@@ -118,18 +119,23 @@ function _renderStats(dists) {
   if (!bar) return;
   const vis = dists.filter(d => d.visible);
   if (vis.length === 0) { bar.innerHTML = ""; return; }
-  bar.innerHTML = vis.map(d => {
+  const f1 = x => x.toFixed(1);
+  const rows = vis.map(d => {
     const s = d.stats();
-    return `<div class="stat-row" style="border-left:4px solid ${d.color}">
-      <span class="stat-label">${d.label}</span>
-      <span>mean <b>${s.mean.toFixed(1)}</b></span>
-      <span>med <b>${s.q50}</b></span>
-      <span>P10 <b>${s.q10}</b></span>
-      <span>P90 <b>${s.q90}</b></span>
-      <span>min <b>${s.min}</b></span>
-      <span>max <b>${s.max}</b></span>
-    </div>`;
+    return `<tr>
+      <td class="st-name"><span class="series-swatch" style="background:${d.color}"></span>${d.label}</td>
+      <td>${f1(s.mean)}</td><td>${f1(s.std)}</td>
+      <td>${s.min}</td><td>${s.q25}</td><td>${s.q50}</td><td>${s.q75}</td>
+      <td>${s.q10}</td><td>${s.q90}</td><td>${s.max}</td>
+    </tr>`;
   }).join("");
+  bar.innerHTML = `<table class="stats-table">
+    <thead><tr>
+      <th class="st-name">Series</th>
+      <th>mean</th><th>σ</th><th>min</th><th>Q1</th><th>med</th><th>Q3</th><th>P10</th><th>P90</th><th>max</th>
+    </tr></thead>
+    <tbody>${rows}</tbody>
+  </table>`;
 }
 
 function _renderSeriesList() {
@@ -282,7 +288,7 @@ function _refreshScenarioList() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "qol-1";
+  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-1";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -356,10 +362,35 @@ export function initUI() {
   const btnPdf = document.getElementById("btn-pdf");
   const btnCdf = document.getElementById("btn-cdf");
   const btnGrouped = document.getElementById("btn-grouped");
-  const quantileControl = document.getElementById("quantile-control");
+  const cdfTools        = document.getElementById("cdf-tools");
   const quantileSlider  = document.getElementById("quantile-slider");
   const quantileNum     = document.getElementById("quantile-num");
   const quantileHits    = document.getElementById("quantile-hits");
+  const lookupX         = document.getElementById("lookup-x");
+  const lookupHits      = document.getElementById("lookup-hits");
+
+  // CDF value lookup: P(X <= x) per visible series (linear interpolation on the CDF).
+  function _cdfAt(s, x) {
+    const { xs, ys } = s.toCDF();
+    if (x <= xs[0]) return x < xs[0] ? 0 : ys[0];
+    if (x >= xs[xs.length - 1]) return 1;
+    for (let i = 1; i < xs.length; i++) {
+      if (x <= xs[i]) {
+        return ys[i - 1] + (x - xs[i - 1]) / (xs[i] - xs[i - 1]) * (ys[i] - ys[i - 1]);
+      }
+    }
+    return 1;
+  }
+  function _updateLookup() {
+    if (!lookupHits) return;
+    const x = parseFloat(lookupX.value);
+    if (Number.isNaN(x)) { lookupHits.innerHTML = ""; return; }
+    lookupHits.innerHTML = _series.filter(s => s.visible).map(s => {
+      const p = _cdfAt(s, x);
+      return `<span class="q-hit" style="border-color:${s.color}"><span class="q-hit-label">${s.label}</span><b>${(p * 100).toFixed(1)}%</b></span>`;
+    }).join("");
+  }
+  lookupX?.addEventListener("input", _updateLookup);
 
   function _updateQuantile() {
     const q = Math.max(0.001, Math.min(0.999, parseFloat(quantileSlider.value) || 0.5));
@@ -392,14 +423,14 @@ export function initUI() {
   btnPdf.addEventListener("click", () => {
     setChartMode("pdf"); destroyChart(); renderChart(_series);
     btnPdf.classList.add("active"); btnCdf.classList.remove("active");
-    btnGrouped.style.display = ""; quantileControl.style.display = "none";
+    btnGrouped.style.display = ""; cdfTools.style.display = "none";
     _persist();
   });
   btnCdf.addEventListener("click", () => {
     setChartMode("cdf"); destroyChart(); renderChart(_series);
     btnCdf.classList.add("active"); btnPdf.classList.remove("active");
-    btnGrouped.style.display = "none"; quantileControl.style.display = "";
-    _updateQuantile(); _persist();
+    btnGrouped.style.display = "none"; cdfTools.style.display = "";
+    _updateQuantile(); _updateLookup(); _persist();
   });
   btnGrouped.addEventListener("click", () => {
     const g = !getGrouped();
@@ -409,7 +440,23 @@ export function initUI() {
     destroyChart(); renderChart(_series);
   });
 
-  document.getElementById("btn-zoom-reset")?.addEventListener("click", resetZoom);
+  // Zoom controls (x-axis)
+  document.getElementById("btn-zoom-in")?.addEventListener("click", () => zoomBy(1.25));
+  document.getElementById("btn-zoom-out")?.addEventListener("click", () => zoomBy(0.8));
+  const xMin = document.getElementById("x-min");
+  const xMax = document.getElementById("x-max");
+  const _applyXLimits = () => {
+    const lo = xMin.value === "" ? null : parseFloat(xMin.value);
+    const hi = xMax.value === "" ? null : parseFloat(xMax.value);
+    if (lo === null && hi === null) return;
+    setXLimits(lo, hi);
+  };
+  xMin?.addEventListener("change", _applyXLimits);
+  xMax?.addEventListener("change", _applyXLimits);
+  document.getElementById("btn-zoom-reset")?.addEventListener("click", () => {
+    resetZoom();
+    if (xMin) xMin.value = ""; if (xMax) xMax.value = "";
+  });
   document.getElementById("cmp-a")?.addEventListener("change", _renderCompare);
   document.getElementById("cmp-b")?.addEventListener("change", _renderCompare);
 

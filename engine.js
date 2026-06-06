@@ -69,6 +69,10 @@ class Dist {
     let mean = 0;
     for (const [v, p] of entries) mean += v * p;
 
+    let variance = 0;
+    for (const [v, p] of entries) variance += p * (v - mean) * (v - mean);
+    const std = Math.sqrt(Math.max(0, variance));
+
     let cumulative = 0;
     let q10, q25, q50, q75, q90;
     for (const [v, p] of entries) {
@@ -81,7 +85,7 @@ class Dist {
     }
 
     return {
-      mean,
+      mean, std,
       min: entries[0][0],
       max: entries[entries.length - 1][0],
       q10, q25, q50, q75, q90,

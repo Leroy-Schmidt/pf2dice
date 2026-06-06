@@ -391,6 +391,99 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 .btn-mode:hover { border-color: var(--accent); color: var(--accent); }
 .btn-mode.active { border-color: var(--accent); color: var(--accent); font-weight: 600; }
 
+/* Grouped/segmented buttons */
+.btn-group { display: inline-flex; }
+.btn-group > * { border-radius: 0; border-right-width: 0; }
+.btn-group > *:first-child { border-top-left-radius: 4px; border-bottom-left-radius: 4px; }
+.btn-group > *:last-child  { border-top-right-radius: 4px; border-bottom-right-radius: 4px; border-right-width: 1px; }
+
+.btn-icon {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-size: 0.83rem;
+  transition: border-color 0.1s, color 0.1s;
+}
+.btn-icon:hover { border-color: var(--accent); color: var(--accent); }
+
+.axis-limit {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  flex-direction: row;
+  font-size: 0.8rem;
+  color: var(--text-dim);
+}
+.axis-input {
+  width: 56px;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  padding: 3px 6px;
+  font-size: 0.8rem;
+}
+
+/* CDF tools row (quantile + value lookup) */
+.cdf-tools {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  align-items: center;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 8px 12px;
+}
+.quantile-control, .lookup-control { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.cdf-label { flex-direction: row; align-items: center; gap: 4px; color: var(--text-dim); font-size: 0.82rem; }
+.cdf-label .axis-input { width: 60px; }
+
+/* ── Stats table ── */
+
+.stats-bar { overflow-x: auto; }
+.stats-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.stats-table th, .stats-table td {
+  padding: 6px 10px;
+  text-align: right;
+  border-bottom: 1px solid var(--border);
+  white-space: nowrap;
+}
+.stats-table th {
+  color: var(--text-dim);
+  font-weight: 600;
+  font-size: 0.74rem;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.stats-table tbody tr:last-child td { border-bottom: none; }
+.stats-table .st-name { text-align: left; color: var(--text); font-weight: 600; }
+.stats-table td { color: var(--text); }
+.stats-table .st-name .series-swatch { display: inline-block; margin-right: 6px; vertical-align: middle; }
+
+/* Advanced disclosure in the form */
+.advanced { border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; }
+.advanced > summary {
+  cursor: pointer;
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  user-select: none;
+}
+.advanced[open] { display: flex; flex-direction: column; gap: 10px; }
+.advanced[open] > summary { margin-bottom: 4px; }
+
 /* ── Comparison panel ── */
 
 .compare-panel {
@@ -475,25 +568,6 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 
 .q-hit-label { color: var(--text-dim); }
 .q-hit b     { color: var(--text); }
-
-/* ── Stats bar ── */
-
-.stats-bar { display: flex; flex-direction: column; gap: 4px; }
-
-.stat-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 4px;
-  padding: 5px 10px;
-  font-size: 0.8rem;
-  color: var(--text-dim);
-  flex-wrap: wrap;
-}
-.stat-label { font-weight: 600; color: var(--text); min-width: 120px; }
-.stat-row b { color: var(--text); }
 
 /* ── Chart ── */
 

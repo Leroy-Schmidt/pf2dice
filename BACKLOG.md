@@ -42,13 +42,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
       CodeMirror; not worth a fragile textarea hack. Revisit during/after redesign.)
 - [x] Dev: no-store server (server.py) for reliable live verification
 
-### 4. UI redesign + declutter
-- [ ] Stats as a real table: mean, σ, min, Q1, median, Q3, P10, P90, max (add `std`,`q25`,`q75` to engine.stats)
-- [ ] Toolbar split: data-view (PDF/CDF) separated from view controls (zoom)
-- [ ] Zoom: x-axis-locked default, typed min/max limits, reset icon, optional scrollbar
-- [ ] CDF value→probability lookup (inverse of quantile line)
-- [ ] Declutter the attack form (move advanced bits behind a disclosure; code is primary now)
-- [ ] Overall layout pass for clarity
+### 4. UI redesign + declutter  ✅ done
+- [x] Stats as a real table: mean, σ, min, Q1, median, Q3, P10, P90, max (added `std` to engine.stats)
+- [x] Toolbar split: data-view (PDF/CDF) vs view controls (zoom) vs export, grouped
+- [x] Zoom: x-axis-locked, +/−/reset icons, typed min/max limits, drag-box on x
+- [x] CDF value→probability lookup: P(X ≤ x) per series (inverse of quantile line)
+- [x] Declutter attack form (advanced options behind a <details> disclosure)
+- [x] Layout pass (segmented button groups, table stats)
 
 ### 5. Fantasy theme
 - [ ] Parchment palette fleshed out, serif display font for headings, paper texture

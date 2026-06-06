@@ -192,25 +192,28 @@
             <button class="qp" data-ac="26">26</button>
             <button class="qp" data-ac="30">30</button>
           </div>
-          <label class="checkbox-label">
-            <input type="checkbox" id="f-offguard"> Target is off-guard (−2 AC)
-          </label>
-          <div class="two-col">
-            <label>Strikes this turn
-              <select id="f-nstrikes">
-                <option value="1">1 (no MAP)</option>
-                <option value="2">2 (with MAP)</option>
-                <option value="3">3 (with MAP)</option>
-              </select>
+          <details class="advanced">
+            <summary>Advanced</summary>
+            <label class="checkbox-label">
+              <input type="checkbox" id="f-offguard"> Target is off-guard (−2 AC)
             </label>
-            <label class="checkbox-label" style="align-self:end;padding-bottom:6px">
-              <input type="checkbox" id="f-agile"> Agile
+            <div class="two-col">
+              <label>Strikes this turn
+                <select id="f-nstrikes">
+                  <option value="1">1 (no MAP)</option>
+                  <option value="2">2 (with MAP)</option>
+                  <option value="3">3 (with MAP)</option>
+                </select>
+              </label>
+              <label class="checkbox-label" style="align-self:end;padding-bottom:6px">
+                <input type="checkbox" id="f-agile"> Agile
+              </label>
+            </div>
+            <label>Resistance / weakness
+              <input type="number" id="f-resist" value="0" min="-30" max="30">
             </label>
-          </div>
-          <label>Resistance / weakness
-            <input type="number" id="f-resist" value="0" min="-30" max="30">
-          </label>
-          <p class="hint">Positive = resistance (reduce, min 0). Negative = weakness.</p>
+            <p class="hint">Positive = resistance (reduce, min 0). Negative = weakness.</p>
+          </details>
         </div>
 
         <!-- Potion options -->
@@ -259,20 +262,49 @@
   <!-- Main: chart -->
   <main class="main-area">
     <div class="chart-toolbar">
-      <button id="btn-pdf" class="btn-mode active">PDF</button>
-      <button id="btn-cdf" class="btn-mode">CDF</button>
-      <button id="btn-grouped" class="btn-mode" title="Only applies to PDF">Side by side</button>
-      <button id="btn-zoom-reset" class="btn-mode" title="Reset zoom">Reset zoom</button>
+      <div class="btn-group" role="group" title="What to plot">
+        <button id="btn-pdf" class="btn-mode active">PDF</button>
+        <button id="btn-cdf" class="btn-mode">CDF</button>
+      </div>
+      <button id="btn-grouped" class="btn-mode" title="PDF only: side-by-side vs overlapping bars">Side by side</button>
+
       <span class="toolbar-spacer"></span>
-      <button id="btn-png" class="btn-mode" title="Download chart as PNG">PNG</button>
-      <button id="btn-csv" class="btn-mode" title="Download distributions as CSV">CSV</button>
-      <button id="btn-share" class="btn-mode" title="Copy shareable link">Share</button>
-      <div id="quantile-control" class="quantile-control" style="display:none">
+
+      <div class="btn-group" title="Zoom the x-axis">
+        <button id="btn-zoom-out" class="btn-icon" title="Zoom out">−</button>
+        <button id="btn-zoom-in" class="btn-icon" title="Zoom in">+</button>
+        <button id="btn-zoom-reset" class="btn-icon" title="Reset zoom">⟲</button>
+      </div>
+      <label class="axis-limit" title="X-axis range">
+        x:
+        <input type="number" id="x-min" class="axis-input" placeholder="min">
+        <span>–</span>
+        <input type="number" id="x-max" class="axis-input" placeholder="max">
+      </label>
+
+      <span class="toolbar-spacer"></span>
+
+      <div class="btn-group" title="Export / share">
+        <button id="btn-png" class="btn-icon" title="Download chart as PNG">PNG</button>
+        <button id="btn-csv" class="btn-icon" title="Download distributions as CSV">CSV</button>
+        <button id="btn-share" class="btn-icon" title="Copy shareable link">Share</button>
+      </div>
+    </div>
+
+    <!-- CDF tools (quantile line + value lookup), shown only in CDF mode -->
+    <div id="cdf-tools" class="cdf-tools" style="display:none">
+      <div class="quantile-control">
+        <label class="cdf-label">Quantile</label>
         <input type="number" id="quantile-num" min="0" max="1" value="0.5" step="0.01">
         <input type="range"  id="quantile-slider" min="0" max="1" value="0.5" step="0.001">
         <div id="quantile-hits" class="quantile-hits"></div>
       </div>
+      <div class="lookup-control">
+        <label class="cdf-label">P(X ≤ <input type="number" id="lookup-x" class="axis-input" placeholder="x">)</label>
+        <div id="lookup-hits" class="quantile-hits"></div>
+      </div>
     </div>
+
     <div id="stats-bar" class="stats-bar"></div>
     <div class="chart-wrap">
       <canvas id="chart"></canvas>

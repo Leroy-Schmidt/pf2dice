@@ -96,12 +96,12 @@ export function renderChart(series, canvasId = "chart") {
       },
     },
     zoom: {
-      pan: { enabled: true, mode: "xy", modifierKey: "shift" },
+      pan: { enabled: true, mode: "x" },
       zoom: {
         wheel: { enabled: true },
-        drag:  { enabled: true, modifierKey: "ctrl" },
+        drag:  { enabled: true },   // drag a box on the chart to zoom (x-axis)
         pinch: { enabled: true },
-        mode: "xy",
+        mode: "x",                  // x-axis locked: never zoom the probability axis
       },
     },
   };
@@ -163,6 +163,23 @@ export function renderChart(series, canvasId = "chart") {
 
 export function resetZoom() {
   if (_chart && _chart.resetZoom) _chart.resetZoom();
+}
+
+export function zoomBy(factor) {
+  if (_chart && _chart.zoom) _chart.zoom(factor);
+}
+
+export function setXLimits(min, max) {
+  if (!_chart || !_chart.zoomScale) return;
+  const cur = _chart.scales.x;
+  const lo = (min === null || min === undefined || Number.isNaN(min)) ? cur.min : min;
+  const hi = (max === null || max === undefined || Number.isNaN(max)) ? cur.max : max;
+  _chart.zoomScale("x", { min: lo, max: hi }, "default");
+}
+
+export function getXRange() {
+  if (!_chart) return { min: null, max: null };
+  return { min: _chart.scales.x.min, max: _chart.scales.x.max };
 }
 
 export function exportPNG(bg = "#1a1a1a", filename = "pf2dice.png") {
