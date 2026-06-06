@@ -1,8 +1,8 @@
 # PF2Dice — Roadmap: Declutter, Restack, Onboard & Share
 
 > Status: **in progress.** Current block scope = Phases 1–3 (Phases 4–6 deferred).
-> Phase 1 (declutter & zoom fix) ✅ done. See `BACKLOG.md` for running history and
-> `pf2dice-DESIGN.md` for architecture.
+> Phase 1 (declutter & zoom) ✅ · Phase 2 (stacked layout) ✅ · Phase 3 (icons + gallery)
+> next. See `BACKLOG.md` for running history and `pf2dice-DESIGN.md` for architecture.
 
 ## Context
 
@@ -34,14 +34,15 @@ screenshots. (Node isn't installed locally; `test-node.mjs` exists for when it i
   kept weapon-preset `<select>` + striking-rune row. Removed the top **Snippets** section.
 - `ui.js`: removed the matching `qp(...)` and snippet wiring. Build marker `declutter-1`.
 
-## Phase 2 — Stacked layout (Overleaf-style)
+## Phase 2 — Stacked layout (Overleaf-style) ✅ done
 - `index.html`: top `.io-row` with two collapsible panels **Form** (left) + **Code**
   (right); below it `.output-area` (toolbar, `#cdf-tools`, `#stats-bar`, `.chart-wrap`,
   compare panel).
-- Collapsing one top panel → it shrinks to a header strip and the other gets `flex:1`.
-  Reuse the existing collapse/localStorage pattern (`sidebar-left/right` → `io-panel`).
-- `style.css`: `.app-layout` becomes `flex-direction:column`; `.io-row {display:flex}`.
-- `ui.js`: re-point collapse wiring; render logic is layout-agnostic and unchanged.
+- Collapsing one top panel shrinks it to a 28px strip; the sibling grows (`flex:1 1 0`).
+  Reused the existing collapse/localStorage wiring unchanged (`pf2dice-sidebar-${side}`).
+- `style.css`: `.app-layout` is `flex-direction:column`; new `.io-row{display:flex;
+  height:42vh}`; `.main-area` renamed `.output-area`.
+- `ui.js`: collapse wiring untouched (ids preserved); build marker `stacked-1`.
 
 ## Phase 3 — Category icons + Examples gallery
 - New `icons.js`: inline SVG glyphs (Treat Wounds=bandage, Heal=plus, Strike=sword,

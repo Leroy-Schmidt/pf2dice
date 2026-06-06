@@ -35,7 +35,10 @@
 
 <div class="app-layout">
 
-  <!-- Left sidebar: Form — toggle FIRST so it stays visible when collapsed -->
+  <!-- Top row: Form + Code side by side, each collapsible -->
+  <div class="io-row">
+
+  <!-- Left panel: Form — toggle FIRST so it stays visible when collapsed -->
   <aside class="sidebar sidebar-left" id="sidebar-left">
     <button class="sidebar-toggle" id="toggle-left" title="Toggle form">&#8249;</button>
     <div class="sidebar-inner">
@@ -214,8 +217,24 @@
     </div>
   </aside>
 
-  <!-- Main: chart -->
-  <main class="main-area">
+  <!-- Right panel: Code — toggle FIRST -->
+  <aside class="sidebar sidebar-right" id="sidebar-right">
+    <button class="sidebar-toggle" id="toggle-right" title="Toggle code">&#8250;</button>
+    <div class="sidebar-inner">
+      <section class="panel panel-code">
+        <h2>Code <span class="h2-note">— source of truth</span></h2>
+        <textarea id="code-input" spellcheck="false" autocomplete="off"
+          placeholder='output twExpert(12) named "TW expert"&#10;output pf2attack(+9,20) * (2d6+4) named "Greataxe"'></textarea>
+        <div id="code-errors" class="code-errors"></div>
+        <p class="hint">One <code>output</code> per series. Use <code>name = expr</code> to define reusable parts. <code>#</code> for comments.</p>
+      </section>
+    </div>
+  </aside>
+
+  </div><!-- /io-row -->
+
+  <!-- Output: chart, stats, compare (full width) -->
+  <main class="output-area">
     <div class="chart-toolbar">
       <div class="btn-group" role="group" title="What to plot">
         <button id="btn-pdf" class="btn-mode active">PDF</button>
@@ -276,20 +295,6 @@
       <div id="compare-result" class="compare-result"></div>
     </section>
   </main>
-
-  <!-- Right sidebar: Code — toggle FIRST -->
-  <aside class="sidebar sidebar-right" id="sidebar-right">
-    <button class="sidebar-toggle" id="toggle-right" title="Toggle code">&#8250;</button>
-    <div class="sidebar-inner">
-      <section class="panel panel-code">
-        <h2>Code <span class="h2-note">— source of truth</span></h2>
-        <textarea id="code-input" spellcheck="false" autocomplete="off"
-          placeholder='output twExpert(12) named "TW expert"&#10;output pf2attack(+9,20) * (2d6+4) named "Greataxe"'></textarea>
-        <div id="code-errors" class="code-errors"></div>
-        <p class="hint">One <code>output</code> per series. Use <code>name = expr</code> to define reusable parts. <code>#</code> for comments.</p>
-      </section>
-    </div>
-  </aside>
 
 </div>
 
