@@ -314,15 +314,58 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 }
 .series-item > button:hover { color: #e55; }
 
-/* ── Code panel ── */
+/* ── Code panel (editable, source of truth) ── */
 
-.panel pre {
-  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
-  font-size: 0.8rem;
+.sidebar-right { width: 340px; }
+.sidebar-right.collapsed { width: 28px; }
+.sidebar-right .sidebar-inner { min-width: calc(340px - 28px); }
+
+.panel-code { flex: 1; min-height: 0; }
+
+.h2-note {
+  text-transform: none;
+  letter-spacing: 0;
+  font-weight: 400;
+  opacity: 0.7;
+}
+
+#code-input {
+  width: 100%;
+  min-height: 200px;
+  flex: 1;
+  resize: vertical;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
   color: var(--code-color);
-  white-space: pre-wrap;
-  word-break: break-word;
-  line-height: 1.5;
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.82rem;
+  line-height: 1.6;
+  padding: 10px;
+  white-space: pre;
+  overflow-wrap: normal;
+  overflow-x: auto;
+  tab-size: 2;
+}
+#code-input:focus { outline: 1px solid var(--accent); }
+
+.code-errors { display: flex; flex-direction: column; gap: 3px; }
+
+.code-error {
+  font-size: 0.76rem;
+  color: #fff;
+  background: #a3301e;
+  border-radius: 3px;
+  padding: 3px 7px;
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+}
+
+.hint code {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 3px;
+  padding: 0 4px;
+  font-size: 0.9em;
 }
 
 /* ── Chart toolbar ── */

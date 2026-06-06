@@ -206,13 +206,13 @@
 
         <div id="preview-ev" class="ev-preview"></div>
 
-        <button id="btn-add" class="btn-primary">+ Add series</button>
+        <button id="btn-add" class="btn-primary">+ Insert into code</button>
       </section>
 
       <section class="panel">
         <h2>Series</h2>
         <div id="series-list"></div>
-        <button id="btn-clear" class="btn-ghost">Clear all</button>
+        <button id="btn-clear" class="btn-ghost">Clear all code</button>
       </section>
 
     </div>
@@ -252,9 +252,12 @@
   <aside class="sidebar sidebar-right" id="sidebar-right">
     <button class="sidebar-toggle" id="toggle-right" title="Toggle code">&#8250;</button>
     <div class="sidebar-inner">
-      <section class="panel">
-        <h2>Expression</h2>
-        <pre id="code-panel"></pre>
+      <section class="panel panel-code">
+        <h2>Code <span class="h2-note">— source of truth</span></h2>
+        <textarea id="code-input" spellcheck="false" autocomplete="off"
+          placeholder='output twExpert(12) named "TW expert"&#10;output pf2attack(+9,20) * (2d6+4) named "Greataxe"'></textarea>
+        <div id="code-errors" class="code-errors"></div>
+        <p class="hint">One <code>output</code> per series. Use <code>name = expr</code> to define reusable parts. <code>#</code> for comments.</p>
       </section>
     </div>
   </aside>
