@@ -16,7 +16,13 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ---
 
-## In flight
+## Next up
+The next block of work is planned in **`ROADMAP.md`** (declutter, stacked layout,
+examples gallery + category icons, `param` sliders, shareable interactive embed, docs).
+
+---
+
+## Shipped (this run)
 
 ### 1. New engine primitives  ✅ done
 - [x] `persistent(dmg, flatDC=15)` — total persistent damage until flat check passes (geometric mixture, exact)
@@ -57,7 +63,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 
 ---
 
-## Parked (not in this run)
+## Someday / maybe
 - Analysis tools: kill-chance / turns-to-kill, difference distribution, EV marker line
 - v3 Turn Builder: conditional/branching sequences (trip → off-guard)
 - Rounding of half-damage (PF2e floors)
+- Share extras: `<iframe>` embed snippet; Discord rich preview (OG meta tags + static
+  preview image); short/custom links (needs a backend)
+- Code panel: syntax highlighting + function autocomplete (deferred in QoL)
