@@ -50,10 +50,10 @@ Legend: `[ ]` todo · `[~]` in progress · `[x]` done
 - [x] Declutter attack form (advanced options behind a <details> disclosure)
 - [x] Layout pass (segmented button groups, table stats)
 
-### 5. Fantasy theme
-- [ ] Parchment palette fleshed out, serif display font for headings, paper texture
-- [ ] Ornamental dividers; "Parchment" becomes default
-- [ ] Screenshot self-check (aesthetic — flag for human review)
+### 5. Fantasy theme  ✅ done (⚠ flagged for human aesthetic review)
+- [x] Parchment palette deepened; Cinzel display font; EB Garamond body; paper texture
+- [x] Ornamental dividers (❧ on headings, ⚜ flourishes on title); "Parchment" is now default
+- [x] Screenshot self-check passed — NEEDS YOUR EYE to confirm it feels right
 
 ---
 
