@@ -62,10 +62,19 @@ committed per step.
 - **Clickable stats → highlight in plot.** Click a value in the stats table (median, P10,
   P90, mean, …) to draw a marker/line for it on the chart; same for the other quantiles.
   Reuse the annotation plugin already loaded.
-- **σ label fix (quick).** Std dev *is* already in the stats table (`engine.stats().std`,
-  rendered in `ui.js`), but `.stats-table th { text-transform: uppercase }` turns the "σ"
-  header into "Σ", which reads as *summation*. Relabel (e.g. "SD") or exempt that header
-  from the uppercase transform.
+- **Stats table tweaks (quick).**
+  - **Mean → back on the right.** Reorder columns so `mean` sits at the right end again
+    (currently it's the first numeric column).
+  - **σ needs a clearer symbol.** Std dev *is* already there (`engine.stats().std`, rendered
+    in `ui.js`), but `.stats-table th { text-transform: uppercase }` turns "σ" into "Σ",
+    which reads as *summation*. Give it a small distinguishing glyph/label (e.g. "SD" or
+    "σ" exempted from the uppercase transform).
+- **Move the Compare button into the plot toolbar.** It currently lives in the series band,
+  which is out of reach once you've scrolled down to the open graph. Put it in the
+  PDF/CDF/Side-by-side toolbar, right-aligned, so it's always near the plot.
+- **Per-series delete (✕).** A small remove button to drop a single series. Place it
+  carefully — next to "show" risks misclicks; consider the stats-table row or the right end
+  of the series chip with a little spacing from the checkbox.
 - **CDF quantile / reverse-quantile visualization.** The quantile line + "P(X ≤ x)" lookup
   don't read clearly as two lines with an intersection — feels cluttered. Decide whether to
   redesign the visual or keep it numeric-only (the readout panel without chart lines).
