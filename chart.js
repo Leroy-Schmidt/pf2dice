@@ -2,6 +2,11 @@ let _chart    = null;
 let _mode     = "pdf"; // "pdf" | "cdf"
 let _grouped  = false;
 let _quantile = 0.5;   // 0–1, CDF annotation line
+let _onViewCb = null;  // called after the view changes (pan/zoom/resize) so overlays reposition
+
+export function getChart()   { return _chart; }
+export function onView(cb)   { _onViewCb = cb; }
+function _fireView() { if (_onViewCb) _onViewCb(); }
 
 export function setChartMode(mode)  { _mode = mode; }
 export function getChartMode()      { return _mode; }
@@ -104,12 +109,13 @@ export function renderChart(series, canvasId = "chart") {
     },
     annotation: { annotations },
     zoom: {
-      pan: { enabled: true, mode: "x" },
+      pan: { enabled: true, mode: "x", onPanComplete: _fireView },
       zoom: {
         wheel: { enabled: true },
         drag:  { enabled: false },  // drag = pan (not a zoom box); wheel/pinch zoom
         pinch: { enabled: true },
         mode: "x",                  // x-axis locked: never zoom the probability axis
+        onZoomComplete: _fireView,
       },
     },
   };
@@ -120,36 +126,25 @@ export function renderChart(series, canvasId = "chart") {
     _chart.options.scales.y.max = yMax;
     _chart.options.plugins.annotation.annotations = annotations;
     _chart.update();
+    _fireView();
     return;
   }
 
-  if (isPdf) {
-    _chart = new Chart(canvas, {
-      type: "bar",
-      data: { datasets },
-      options: {
-        grouped: _grouped,
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        scales: commonScales,
-        plugins: commonPlugins,
-      },
-    });
-  } else {
-    _chart = new Chart(canvas, {
-      type: "line",
-      data: { datasets },
-      options: {
-        animation: false,
-        responsive: true,
-        maintainAspectRatio: false,
-        interaction: { mode: "index", intersect: false },
-        scales: commonScales,
-        plugins: commonPlugins,
-      },
-    });
-  }
+  _chart = new Chart(canvas, {
+    type: isPdf ? "bar" : "line",
+    data: { datasets },
+    options: {
+      grouped: isPdf ? _grouped : undefined,
+      animation: isPdf ? undefined : false,
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: "index", intersect: false },
+      scales: commonScales,
+      plugins: commonPlugins,
+      onResize: _fireView,
+    },
+  });
+  _fireView();
 }
 
 // ── Y-axis scaling helpers ─────────────────────────────────────────────────────
@@ -159,8 +154,8 @@ export function setYMax(v)  { _yMaxOverride = (v == null || Number.isNaN(v)) ? n
 export function clearYMax() { _yMaxOverride = null; }
 
 function computeYMax(visible, isPdf) {
-  if (_yMaxOverride != null) return _yMaxOverride;
   if (!isPdf) return undefined;              // CDF spans 0..1 naturally
+  if (_yMaxOverride != null) return _yMaxOverride;
   let maxNonZero = 0, clipped = false;
   for (const s of visible) {
     const { xs, ys } = s.toXY();

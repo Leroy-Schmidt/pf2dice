@@ -685,6 +685,46 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 }
 .chart-wrap:hover .chart-overlay .btn-icon { opacity: 1; }
 
+/* Click-to-edit axis-end labels */
+.axis-edit {
+  position: absolute;
+  z-index: 6;
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  color: var(--text);
+  font-size: 0.72rem;
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  padding: 1px 5px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;            /* don't block chart drag/pan when hidden */
+  transition: opacity 0.15s, border-color 0.15s, color 0.15s;
+  white-space: nowrap;
+}
+.chart-wrap:hover .axis-edit { opacity: 1; pointer-events: auto; }
+.axis-edit:hover { border-color: var(--accent); color: var(--accent); }
+
+.axis-edit-input {
+  position: absolute;
+  z-index: 7;
+  width: 60px;
+  font-size: 0.72rem;
+  padding: 1px 4px;
+  background: var(--surface);
+  color: var(--text);
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+}
+
+/* anchor transforms: ymax sits left of the y-axis top; x ends sit below the axis */
+.axis-ymax       { transform: translate(-100%, -50%); }
+.axis-xmin       { transform: translate(0, 5px); }
+.axis-xmax       { transform: translate(-100%, 5px); }
+.axis-edit-input.axis-ymax { transform: translate(-100%, -50%); }
+.axis-edit-input.axis-xmin { transform: translate(0, 5px); }
+.axis-edit-input.axis-xmax { transform: translate(-100%, 5px); }
+
 /* ── Category icon picker ── */
 
 .panel-head {

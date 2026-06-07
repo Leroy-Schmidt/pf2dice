@@ -4,7 +4,7 @@ import { ICONS } from "./icons.js";
 import {
   renderChart, setChartMode, getChartMode, destroyChart,
   setGrouped, getGrouped, setQuantile, resetZoom, exportPNG,
-  zoomBy, setXLimits,
+  setXLimits, setYMax, clearYMax, getChart, onView,
 } from "./chart.js";
 
 // Examples gallery — ready-made expressions with a one-line explanation.
@@ -281,6 +281,83 @@ function _esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+// ── Click-to-edit axis ends ────────────────────────────────────────────────────
+// Small clickable labels overlaid at the axis ends: probability max (top-left),
+// outcome min (bottom-left), outcome max (bottom-right). Click → type a limit.
+
+function _initAxisEditors() {
+  const wrap = document.querySelector(".chart-wrap");
+  if (!wrap) return;
+  [["ymax", "Set max probability"], ["xmin", "Set min outcome"], ["xmax", "Set max outcome"]]
+    .forEach(([axis, title]) => {
+      const el = document.createElement("button");
+      el.type = "button";
+      el.className = `axis-edit axis-${axis}`;
+      el.title = title;
+      el.addEventListener("click", () => _editAxis(el, axis));
+      wrap.appendChild(el);
+    });
+  onView(_positionAxisEditors);
+  window.addEventListener("resize", _positionAxisEditors);
+}
+
+function _positionAxisEditors() {
+  const chart = getChart();
+  const wrap  = document.querySelector(".chart-wrap");
+  if (!chart || !wrap) return;
+  const cr = chart.canvas.getBoundingClientRect();
+  const wr = wrap.getBoundingClientRect();
+  const x = chart.scales.x, y = chart.scales.y;
+  const isPdf = getChartMode() === "pdf";
+  const set = (axis, text, px, py, show = true) => {
+    const el = wrap.querySelector(`.axis-${axis}`);
+    if (!el) return;
+    el.textContent = text;
+    el.style.display = show ? "" : "none";
+    el.style.left = (cr.left - wr.left + px) + "px";
+    el.style.top  = (cr.top  - wr.top  + py) + "px";
+  };
+  const fmtX = v => (v == null || Number.isNaN(v)) ? "—" : Math.round(v).toString();
+  set("ymax", (y.max * 100).toFixed(1) + "%", x.left, y.top, isPdf); // probability only in PDF
+  set("xmin", fmtX(x.min), x.left,  y.bottom);
+  set("xmax", fmtX(x.max), x.right, y.bottom);
+}
+
+function _editAxis(el, axis) {
+  const chart = getChart();
+  if (!chart) return;
+  const isPdf = getChartMode() === "pdf";
+  const cur = axis === "ymax" ? chart.scales.y.max
+            : axis === "xmin" ? chart.scales.x.min
+            :                   chart.scales.x.max;
+  const input = document.createElement("input");
+  input.type = "number";
+  input.className = `axis-edit-input axis-${axis}`;
+  input.value = axis === "ymax" ? +(cur * 100).toFixed(2) : Math.round(cur);
+  if (axis === "ymax") { input.step = "0.5"; input.min = "0"; }
+  input.style.left = el.style.left;
+  input.style.top  = el.style.top;
+  el.parentElement.appendChild(input);
+  input.focus(); input.select();
+
+  let done = false;
+  const cleanup = () => { if (!done) { done = true; input.remove(); _positionAxisEditors(); } };
+  const commit = () => {
+    const v = parseFloat(input.value);
+    if (!Number.isNaN(v)) {
+      if (axis === "ymax")      { setYMax(isPdf ? v / 100 : null); renderChart(_series); }
+      else if (axis === "xmin") { setXLimits(v, null); }
+      else                      { setXLimits(null, v); }
+    }
+    cleanup();
+  };
+  input.addEventListener("keydown", e => {
+    if (e.key === "Enter") commit();
+    else if (e.key === "Escape") cleanup();
+  });
+  input.addEventListener("blur", commit);
+}
+
 // ── Persistence ──────────────────────────────────────────────────────────────
 
 function _persist() {
@@ -336,7 +413,7 @@ function _bgColor() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-3";
+  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-4";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -360,8 +437,9 @@ export function initUI() {
   });
   _updateCategoryRows();
 
-  // Examples gallery
+  // Examples gallery + click-to-edit axis ends
   _initExamples();
+  _initAxisEditors();
 
   ["f-tw-tier","f-mod","f-rank","f-rs","f-potion-tier",
    "f-atk","f-ac","f-ndice","f-dsize","f-dmgbonus",
@@ -480,8 +558,12 @@ export function initUI() {
     destroyChart(); renderChart(_series);
   });
 
-  // Reset zoom (in the plot overlay)
-  document.getElementById("btn-zoom-reset")?.addEventListener("click", () => resetZoom());
+  // Reset zoom + probability axis (in the plot overlay)
+  document.getElementById("btn-zoom-reset")?.addEventListener("click", () => {
+    resetZoom();
+    clearYMax();
+    renderChart(_series);
+  });
   document.getElementById("cmp-a")?.addEventListener("change", _renderCompare);
   document.getElementById("cmp-b")?.addEventListener("change", _renderCompare);
 
