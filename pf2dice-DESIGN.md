@@ -1,6 +1,6 @@
 # PF2Dice — Design Document
-**Version:** 2.x (v1 + v2 shipped; see `ROADMAP.md` for the in-progress block)  
-**Purpose:** This document is the architecture source of truth for the project. Any new AI session or contributor should read this before touching any file. It encodes the design decisions behind the engine, expression language, and UI. `BACKLOG.md` tracks history; `ROADMAP.md` tracks the current block of work.
+**Version:** 2.x (v1 + v2 shipped; redesign rounds 1–2 shipped)  
+**Purpose:** This document is the architecture source of truth for the project. Any new AI session or contributor should read this before touching any file. It encodes the design decisions behind the engine, expression language, and UI. `BACKLOG.md` tracks history, what's next, and ideas under consideration.
 
 ---
 

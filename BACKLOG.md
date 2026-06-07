@@ -1,85 +1,87 @@
-# PF2Dice — Backlog
+# PF2Dice — Backlog & Notes
 
-Working list for the autonomous build. Order = execution order. Each item ships
-working + self-tested (`?test=1`) + committed before the next begins. Aesthetic
-items get a screenshot self-check.
+Single working doc: condensed history, what's next, and ideas under consideration.
+Architecture lives in `pf2dice-DESIGN.md`. (`ROADMAP.md` was retired once its plan
+shipped — its remaining phases are folded into "Next up" below.)
 
-Legend: `[ ]` todo · `[~]` in progress · `[x]` done
-
----
-
-## Done (history)
-- [x] v1 engine, presets, chart, UI (engine→presets→chart→ui→html)
-- [x] Tier 1: zoom, off-guard, MAP routine, resistance, comparison P(A>B)
-- [x] v2 expr engine (`expr.js`): tokenizer, parser, evaluator, scalar/degree `*`
-- [x] v2 Phase 2: editable code panel as source of truth
+Legend: `[ ]` todo · `[~] `in progress · `[x]` done · ships working + `?test=1` green,
+committed per step.
 
 ---
 
-## Next up
-Block planned in **`ROADMAP.md`**. Phases 1–3 ✅ shipped (declutter & zoom fix, stacked
-layout, category icons + examples gallery). Remaining (deferred): Phase 4 `param` sliders,
-Phase 5 shareable interactive embed, Phase 6 developer docs (`README.md` / `VISION.md`).
+## Shipped (condensed history)
+
+- **v1** — engine, presets, chart, UI; exact distributions + 4-degree-of-success.
+- **Tier 1** — zoom, off-guard, MAP routine, resistance, P(A>B) comparison.
+- **v2 expression engine** (`expr.js`) — tokenizer/parser/evaluator; editable code panel is
+  the source of truth; scalar/degree `*` overloads.
+- **Engine primitives** — `persistent()`, `keephigh`/`keeplow()`, Fortune attack/save.
+- **Content** — `targetAC`/`targetSave`/`levelDC`, `fireball`/`electricArc`, sample builds.
+- **QoL** — PNG/CSV export, copy-share-link, no-store dev server (`server.py`).
+- **v2 UI** — stats table (incl. σ), zoom controls, CDF value lookup; parchment theme.
+- **Redesign R1** — declutter + zoom fix, stacked layout, category icons + examples gallery.
+- **Redesign R2** — `true`/`false` literals (Risky-Surgery fix) + `let` sugar; single-scroll
+  layout (Code collapsed by default) + restored stats band; zero-bar auto-scale + label;
+  click-to-edit axis ends; compare dialog; preset `.formula` transparency.
+- **Removed** — named scenarios (share links cover persistence).
 
 ---
 
-## Shipped (this run)
+## Next up (planned — inherited from the retired ROADMAP)
 
-### 1. New engine primitives  ✅ done
-- [x] `persistent(dmg, flatDC=15)` — total persistent damage until flat check passes (geometric mixture, exact)
-- [x] `keephigh(n, faces)` / `keeplow(n, faces)` — max/min of n dice (advantage-style)
-- [x] `pf2attackfortune` / `pf2savefortune` — Fortune (roll d20 twice, keep higher), nat1/20 on kept die
-- [x] Self-tests: persistent(d6) mean ≈ 11.667, keephigh(2,20) mean ≈ 13.825, fortune ≥ normal
-- [x] Doc §16.5 updated
-- [x] Node-safe modules + headless verification (preview_eval; Node test file kept for when node exists)
+### Phase 4 — Parameters / sliders   ← NEXT
+- `expr.js`: `evaluate(src, paramValues = {})`; support `x = slider(DEFAULT, MIN, MAX[, STEP])`
+  (and/or `param X = DEFAULT (MIN..MAX[, STEP])`) — register a param, inject its current
+  value (point-mass) into the env, return `{ series, errors, params }`.
+- `ui.js`: `_paramValues` state; a labelled slider strip above the plot; dragging
+  re-evaluates (debounced). Persist values in the URL hash / localStorage.
+- Self-test: `evaluate('x = slider(12,0,20)\noutput twExpert(x)', {x:10})` → 1 series,
+  mean == `twExpert(10).ev()`, 1 param.
 
-### 2. Content presets  ✅ done
-- [x] Creature-level target tables → `targetAC(level)`, `targetSave(level)`, `levelDC(level)` (authoritative GM Core / AoN values)
-- [x] Class/weapon strike sample snippets (Fighter, Rogue w/ sneak, Barbarian rage)
-- [x] Spell/cantrip damage helpers (`fireball(rank)`, `electricArc(rank,mod)`)
-- [x] Form: "Snippets" inserter (low-clutter dropdown → appends code)
-- [x] Self-tests (target tables, fireball/electricArc means, all snippets evaluate clean)
+### Phase 5 — Shareable interactive view
+- New `embed.html` + `embed.js` (read-only): reads `{code, paramValues, chartMode}` from the
+  URL hash; renders title + param sliders + chart + compact stats; no editor. Dragging a
+  slider re-evaluates live.
+- Main app: a "Share interactive" button builds `embed.html#<base64(state)>` and copies it.
+  Self-contained, no server, never expires.
 
-### 3. Quality of life  ✅ done (highlighting/autocomplete deferred)
-- [x] Export chart as PNG (composited onto theme background)
-- [x] Export visible distribution(s) as CSV (value + per-series PDF columns)
-- [x] "Copy share link" button (current URL hash) with "Copied!" feedback
-- [x] ~~Saved scenarios (named localStorage slots)~~ — REMOVED in redesign round 2
-      (share links cover persistence; the UI was clutter)
-- [~] Code panel syntax highlighting + autocomplete — DEFERRED (needs overlay or
-      CodeMirror; not worth a fragile textarea hack. Revisit during/after redesign.)
-- [x] Dev: no-store server (server.py) for reliable live verification
+### Phase 6 — Developer docs
+- `README.md`: what it is, how to run (`python server.py 8001`), module order
+  (`engine → presets → expr → library → codegen → ui → chart`, + `icons`, `embed`), the
+  expression language, testing, conventions (exact arithmetic, no build).
+- `VISION.md`: the niche (exact PF2e distributions + A-vs-B + interactive sharing that DPR
+  calculators don't offer), capabilities, ideas.
 
-### 4. UI redesign + declutter  ✅ done
-- [x] Stats as a real table: mean, σ, min, Q1, median, Q3, P10, P90, max (added `std` to engine.stats)
-- [x] Toolbar split: data-view (PDF/CDF) vs view controls (zoom) vs export, grouped
-- [x] Zoom: x-axis-locked, +/−/reset icons, typed min/max limits, drag-box on x
-- [x] CDF value→probability lookup: P(X ≤ x) per series (inverse of quantile line)
-- [x] Declutter attack form (advanced options behind a <details> disclosure)
-- [x] Layout pass (segmented button groups, table stats)
+---
 
-### 5. Fantasy theme  ✅ done (⚠ flagged for human aesthetic review)
-- [x] Parchment palette deepened; Cinzel display font; EB Garamond body; paper texture
-- [x] Ornamental dividers (❧ on headings, ⚜ flourishes on title); "Parchment" is now default
-- [x] Screenshot self-check passed — NEEDS YOUR EYE to confirm it feels right
+## Ideas under consideration (from review — not yet scheduled)
 
-### 6. Redesign rounds 1–2 (ROADMAP)  ✅ done
-- [x] R1: declutter + zoom fix, stacked layout, category icons + examples gallery
-- [x] R2 P1: boolean literals (`true`/`false`) — fixes Risky Surgery `twExpert(x,true)`;
-      `let` assignment sugar
-- [x] R2 P2: single-document-scroll layout, Code collapsed by default, series band with the
-      restored stats table, ~85vh plot; removed scenarios + all quick-picks
-- [x] R2 P3: slim plot toolbar (export/reset overlay); zero-bar auto-scale + label
-- [x] R2 P4: click-to-edit axis ends (probability max, outcome min/max)
-- [x] R2 P5: Compare moved into a dialog
-- [x] R2 P6: preset dice-math transparency (`.formula` subtitle + tooltip)
+- **Fat zero-bar.** Instead of a thin spike, render the outcome-0 bar wider so the eye keeps
+  a sense of the distribution's center of mass even while it's clipped. (Pairs with the
+  existing zero-bar auto-scale + label.)
+- **Clickable stats → highlight in plot.** Click a value in the stats table (median, P10,
+  P90, mean, …) to draw a marker/line for it on the chart; same for the other quantiles.
+  Reuse the annotation plugin already loaded.
+- **σ label fix (quick).** Std dev *is* already in the stats table (`engine.stats().std`,
+  rendered in `ui.js`), but `.stats-table th { text-transform: uppercase }` turns the "σ"
+  header into "Σ", which reads as *summation*. Relabel (e.g. "SD") or exempt that header
+  from the uppercase transform.
+- **CDF quantile / reverse-quantile visualization.** The quantile line + "P(X ≤ x)" lookup
+  don't read clearly as two lines with an intersection — feels cluttered. Decide whether to
+  redesign the visual or keep it numeric-only (the readout panel without chart lines).
+- **Scroll/zoom interaction rethink.** Current model overloads the wheel: page-scroll to get
+  from Code down to the plot, then the wheel zooms once the cursor is over the chart — a
+  context switch that's fine once learned but arguably surprising. Consider: drag-to-zoom
+  only, with chart wheel/pan disabled so the wheel always scrolls the page. (Trade-off:
+  loses quick wheel-zoom. Worth a small experiment.)
 
 ---
 
 ## Someday / maybe
-- Analysis tools: kill-chance / turns-to-kill, difference distribution, EV marker line
-- v3 Turn Builder: conditional/branching sequences (trip → off-guard)
-- Rounding of half-damage (PF2e floors)
-- Share extras: `<iframe>` embed snippet; Discord rich preview (OG meta tags + static
-  preview image); short/custom links (needs a backend)
-- Code panel: syntax highlighting + function autocomplete (deferred in QoL)
+- Analysis tools: kill-chance / turns-to-kill, difference distribution, EV marker line.
+- v3 Turn Builder: conditional/branching sequences (trip → off-guard); needs `if`/loops.
+- Half-damage rounding (PF2e floors).
+- Share extras: `<iframe>` embed snippet; Discord rich preview (OG meta + static image);
+  short/custom links (needs a backend).
+- Code panel: syntax highlighting + function autocomplete (deferred — needs an overlay or
+  CodeMirror; not worth a fragile textarea hack).
