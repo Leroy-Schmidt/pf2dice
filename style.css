@@ -668,6 +668,23 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
   position: relative;
 }
 
+/* Export / reset cluster, tucked into the plot's top-right corner */
+.chart-overlay {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 5;
+  display: flex;
+  gap: 4px;
+}
+.chart-overlay .btn-icon {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  opacity: 0.55;
+  transition: opacity 0.15s;
+}
+.chart-wrap:hover .chart-overlay .btn-icon { opacity: 1; }
+
 /* ── Category icon picker ── */
 
 .panel-head {

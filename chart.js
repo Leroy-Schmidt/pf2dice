@@ -75,6 +75,12 @@ export function renderChart(series, canvasId = "chart") {
     }
   });
 
+  // ── Y-axis max + annotations ────────────────────────────────────────────────
+  // Zero-bar handling (PDF): the outcome-0 spike (misses/fails) often dwarfs the
+  // rest. Scale Y to the tallest NON-zero bar and label the clipped 0-bars.
+  const yMax = computeYMax(visible, isPdf);
+  const annotations = buildAnnotations(visible, isPdf, yMax);
+
   const commonScales = {
     x: {
       type: "linear",
@@ -85,6 +91,7 @@ export function renderChart(series, canvasId = "chart") {
     y: {
       title: { display: true, text: yLabel },
       min: 0,
+      max: yMax,           // undefined ⇒ Chart.js auto-scales
     },
   };
 
@@ -95,6 +102,7 @@ export function renderChart(series, canvasId = "chart") {
         label: ctx => `${ctx.dataset.label}: ${(ctx.parsed.y * 100).toFixed(2)}%`,
       },
     },
+    annotation: { annotations },
     zoom: {
       pan: { enabled: true, mode: "x" },
       zoom: {
@@ -106,28 +114,11 @@ export function renderChart(series, canvasId = "chart") {
     },
   };
 
-  if (!isPdf) {
-    commonPlugins.annotation = {
-      annotations: {
-        quantileLine: {
-          type: "line",
-          yMin: _quantile,
-          yMax: _quantile,
-          borderColor: "rgba(255,255,255,0.5)",
-          borderWidth: 1.5,
-          borderDash: [6, 4],
-        },
-      },
-    };
-  }
-
   if (_chart) {
     _chart.data.datasets = datasets;
     _chart.options.scales.y.title.text = yLabel;
-    if (!isPdf) {
-      _chart.options.plugins.annotation.annotations.quantileLine.yMin = _quantile;
-      _chart.options.plugins.annotation.annotations.quantileLine.yMax = _quantile;
-    }
+    _chart.options.scales.y.max = yMax;
+    _chart.options.plugins.annotation.annotations = annotations;
     _chart.update();
     return;
   }
@@ -159,6 +150,64 @@ export function renderChart(series, canvasId = "chart") {
       },
     });
   }
+}
+
+// ── Y-axis scaling helpers ─────────────────────────────────────────────────────
+let _yMaxOverride = null;   // user override (Phase 4 click-to-edit); beats auto-scale
+
+export function setYMax(v)  { _yMaxOverride = (v == null || Number.isNaN(v)) ? null : v; }
+export function clearYMax() { _yMaxOverride = null; }
+
+function computeYMax(visible, isPdf) {
+  if (_yMaxOverride != null) return _yMaxOverride;
+  if (!isPdf) return undefined;              // CDF spans 0..1 naturally
+  let maxNonZero = 0, clipped = false;
+  for (const s of visible) {
+    const { xs, ys } = s.toXY();
+    for (let i = 0; i < xs.length; i++)
+      if (xs[i] !== 0 && ys[i] > maxNonZero) maxNonZero = ys[i];
+  }
+  for (const s of visible) {
+    const { xs, ys } = s.toXY();
+    const zi = xs.indexOf(0);
+    if (zi !== -1 && ys[zi] > maxNonZero) clipped = true;
+  }
+  return (clipped && maxNonZero > 0) ? maxNonZero * 1.08 : undefined;
+}
+
+function buildAnnotations(visible, isPdf, yMax) {
+  const ann = {};
+  if (!isPdf) {
+    ann.quantileLine = {
+      type: "line", yMin: _quantile, yMax: _quantile,
+      borderColor: "rgba(255,255,255,0.5)", borderWidth: 1.5, borderDash: [6, 4],
+    };
+    return ann;
+  }
+  if (yMax == null) return ann;
+  // Label every 0-bar that exceeds the plotted yMax (i.e. is clipped).
+  let n = 0;
+  for (const s of visible) {
+    const { xs, ys } = s.toXY();
+    const zi = xs.indexOf(0);
+    if (zi !== -1 && ys[zi] > yMax) {
+      ann["zero" + n] = {
+        type: "label",
+        xValue: 0,
+        yValue: yMax,
+        xAdjust: 30,            // nudge right so it clears the y-axis
+        yAdjust: 12 + n * 20,
+        content: [`↑ ${(ys[zi] * 100).toFixed(0)}% at 0`],
+        color: "#fff",
+        backgroundColor: s.color,
+        font: { size: 10, weight: "bold" },
+        padding: 4,
+        borderRadius: 3,
+      };
+      n++;
+    }
+  }
+  return ann;
 }
 
 export function resetZoom() {

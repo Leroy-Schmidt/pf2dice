@@ -336,7 +336,7 @@ function _bgColor() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-2";
+  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-3";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -480,23 +480,8 @@ export function initUI() {
     destroyChart(); renderChart(_series);
   });
 
-  // Zoom controls (x-axis)
-  document.getElementById("btn-zoom-in")?.addEventListener("click", () => zoomBy(1.25));
-  document.getElementById("btn-zoom-out")?.addEventListener("click", () => zoomBy(0.8));
-  const xMin = document.getElementById("x-min");
-  const xMax = document.getElementById("x-max");
-  const _applyXLimits = () => {
-    const lo = xMin.value === "" ? null : parseFloat(xMin.value);
-    const hi = xMax.value === "" ? null : parseFloat(xMax.value);
-    if (lo === null && hi === null) return;
-    setXLimits(lo, hi);
-  };
-  xMin?.addEventListener("change", _applyXLimits);
-  xMax?.addEventListener("change", _applyXLimits);
-  document.getElementById("btn-zoom-reset")?.addEventListener("click", () => {
-    resetZoom();
-    if (xMin) xMin.value = ""; if (xMax) xMax.value = "";
-  });
+  // Reset zoom (in the plot overlay)
+  document.getElementById("btn-zoom-reset")?.addEventListener("click", () => resetZoom());
   document.getElementById("cmp-a")?.addEventListener("change", _renderCompare);
   document.getElementById("cmp-b")?.addEventListener("change", _renderCompare);
 

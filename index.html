@@ -221,28 +221,6 @@
         <button id="btn-cdf" class="btn-mode">CDF</button>
       </div>
       <button id="btn-grouped" class="btn-mode" title="PDF only: side-by-side vs overlapping bars">Side by side</button>
-
-      <span class="toolbar-spacer"></span>
-
-      <div class="btn-group" title="Zoom the x-axis">
-        <button id="btn-zoom-out" class="btn-icon" title="Zoom out">−</button>
-        <button id="btn-zoom-in" class="btn-icon" title="Zoom in">+</button>
-        <button id="btn-zoom-reset" class="btn-icon" title="Reset zoom">⟲</button>
-      </div>
-      <label class="axis-limit" title="X-axis range">
-        x:
-        <input type="number" id="x-min" class="axis-input" placeholder="min">
-        <span>–</span>
-        <input type="number" id="x-max" class="axis-input" placeholder="max">
-      </label>
-
-      <span class="toolbar-spacer"></span>
-
-      <div class="btn-group" title="Export / share">
-        <button id="btn-png" class="btn-icon" title="Download chart as PNG">PNG</button>
-        <button id="btn-csv" class="btn-icon" title="Download distributions as CSV">CSV</button>
-        <button id="btn-share" class="btn-icon" title="Copy shareable link">Share</button>
-      </div>
     </div>
 
     <!-- CDF tools (quantile line + value lookup), shown only in CDF mode -->
@@ -260,6 +238,12 @@
     </div>
 
     <div class="chart-wrap">
+      <div class="chart-overlay">
+        <button id="btn-png" class="btn-icon" title="Download chart as PNG">PNG</button>
+        <button id="btn-csv" class="btn-icon" title="Download distributions as CSV">CSV</button>
+        <button id="btn-share" class="btn-icon" title="Copy shareable link">Share</button>
+        <button id="btn-zoom-reset" class="btn-icon" title="Reset zoom">⟲</button>
+      </div>
       <canvas id="chart"></canvas>
     </div>
 
