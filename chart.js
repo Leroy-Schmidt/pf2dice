@@ -58,6 +58,7 @@ export function renderChart(series, canvasId = "chart") {
     if (isPdf) {
       return {
         label: s.label,
+        formula: s.formula,
         data,
         backgroundColor: s.color + "77",
         borderColor: s.color,
@@ -69,6 +70,7 @@ export function renderChart(series, canvasId = "chart") {
     } else {
       return {
         label: s.label,
+        formula: s.formula,
         data,
         borderColor: s.color,
         backgroundColor: s.color + "22",
@@ -105,6 +107,7 @@ export function renderChart(series, canvasId = "chart") {
     tooltip: {
       callbacks: {
         label: ctx => `${ctx.dataset.label}: ${(ctx.parsed.y * 100).toFixed(2)}%`,
+        afterLabel: ctx => ctx.dataset.formula ? `  = ${ctx.dataset.formula}` : "",
       },
     },
     annotation: { annotations },

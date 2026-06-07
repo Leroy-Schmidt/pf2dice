@@ -1,5 +1,13 @@
 import { Dist, d, pf2damage, degreesOfSuccess } from "./engine.js";
 
+// Human-readable dice-math expansion shown under preset series (Phase 6).
+const _b = n => (n ? ` + ${n}` : "");   // " + N" or "" for a damage bonus
+function _twFormula(mod, dc, bonus, rs) {
+  return rs
+    ? `Risky: d20+${mod + 2} vs DC${dc} → hit 4d8${_b(bonus)} · CF −1d8 · −1d8 upfront`
+    : `d20+${mod} vs DC${dc} → S 2d8${_b(bonus)} · CS 4d8${_b(bonus)} · CF −1d8`;
+}
+
 function _twDist(mod, dc, bonus) {
   const probs = [0, 0, 0, 0];
   for (let roll = 1; roll <= 20; roll++) probs[degreesOfSuccess(roll, mod, dc)] += 1/20;
@@ -37,6 +45,7 @@ export function twTrained(mod, rs = false) {
   const dist = rs ? _twRS(mod, 15, 0) : _twDist(mod, 15, 0);
   dist.label = `TW trained${rs ? " RS" : ""} (+${mod})`;
   dist.color = "#888780";
+  dist.formula = _twFormula(mod, 15, 0, rs);
   return dist;
 }
 
@@ -44,6 +53,7 @@ export function twExpert(mod, rs = false) {
   const dist = rs ? _twRS(mod, 20, 10) : _twDist(mod, 20, 10);
   dist.label = `TW expert${rs ? " RS" : ""} (+${mod})`;
   dist.color = "#D85A30";
+  dist.formula = _twFormula(mod, 20, 10, rs);
   return dist;
 }
 
@@ -51,6 +61,7 @@ export function twMaster(mod, rs = false) {
   const dist = rs ? _twRS(mod, 30, 30) : _twDist(mod, 30, 30);
   dist.label = `TW master${rs ? " RS" : ""} (+${mod})`;
   dist.color = "#185FA5";
+  dist.formula = _twFormula(mod, 30, 30, rs);
   return dist;
 }
 
@@ -58,6 +69,7 @@ export function twLegendary(mod, rs = false) {
   const dist = rs ? _twRS(mod, 40, 50) : _twDist(mod, 40, 50);
   dist.label = `TW legendary${rs ? " RS" : ""} (+${mod})`;
   dist.color = "#1D9E75";
+  dist.formula = _twFormula(mod, 40, 50, rs);
   return dist;
 }
 
@@ -66,6 +78,7 @@ export function healSpell(rank) {
   for (let i = 0; i < rank; i++) dist = dist.add(d(8));
   dist.label = `Heal rank ${rank}`;
   dist.color = "#7F77DD";
+  dist.formula = `${rank}d8 + ${rank * 8}`;
   return dist;
 }
 
@@ -73,6 +86,7 @@ export function potionMinor() {
   const dist = d(8).add(d(8)).shift(5);
   dist.label = "Minor potion";
   dist.color = "#BA7517";
+  dist.formula = "2d8 + 5";
   return dist;
 }
 
@@ -80,6 +94,7 @@ export function potionLesser() {
   const dist = d(8).add(d(8)).add(d(8)).shift(10);
   dist.label = "Lesser potion";
   dist.color = "#D4537E";
+  dist.formula = "3d8 + 10";
   return dist;
 }
 
@@ -87,6 +102,7 @@ export function potionModerate() {
   const dist = d(8).add(d(8)).add(d(8)).add(d(8)).shift(15);
   dist.label = "Moderate potion";
   dist.color = "#BA7517";
+  dist.formula = "4d8 + 15";
   return dist;
 }
 
@@ -95,6 +111,7 @@ export function potionGreater() {
   for (let i = 0; i < 6; i++) dist = dist.add(d(8));
   dist.label = "Greater potion";
   dist.color = "#D4537E";
+  dist.formula = "6d8 + 25";
   return dist;
 }
 
@@ -138,6 +155,9 @@ export function strike(attackMod, targetAC, numDice, dieSize, bonus = 0, resist 
   const dist = singleStrike(attackMod, targetAC, numDice, dieSize, bonus, resist);
   dist.label = `Strike +${attackMod} vs AC${targetAC} (${numDice}d${dieSize}+${bonus})`;
   dist.color = "#E24B4A";
+  dist.formula = `+${attackMod} vs AC${targetAC} → hit ${numDice}d${dieSize}${_b(bonus)}` +
+                 ` · crit ${numDice * 2}d${dieSize}${_b(bonus * 2)}` +
+                 (resist ? ` · ${resist > 0 ? "resist" : "weak"} ${Math.abs(resist)}` : "");
   return dist;
 }
 
@@ -152,6 +172,8 @@ export function strikeRoutine(attackMod, targetAC, numStrikes, numDice, dieSize,
   }
   total.label = `${numStrikes}× Strike +${attackMod} vs AC${targetAC}${agile ? " (agile)" : ""}`;
   total.color = "#E24B4A";
+  total.formula = `${numStrikes}× ${numDice}d${dieSize}${_b(bonus)} vs AC${targetAC}, ` +
+                  `MAP −${agile ? 4 : 5}/−${agile ? 8 : 10}`;
   return total;
 }
 

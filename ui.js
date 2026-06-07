@@ -167,9 +167,12 @@ function _renderSeriesList() {
   el.innerHTML = _series.length === 0
     ? `<p class="hint">No outputs yet. Use the form or type in the code panel.</p>`
     : _series.map((s, i) => `
-      <div class="series-item">
+      <div class="series-item${s.visible ? "" : " hidden-series"}">
         <span class="series-swatch" style="background:${s.color}"></span>
-        <span class="series-name">${s.label}</span>
+        <span class="series-text">
+          <span class="series-name">${_esc(s.label)}</span>
+          ${s.formula ? `<span class="series-formula">${_esc(s.formula)}</span>` : ""}
+        </span>
         <label class="series-vis">
           <input type="checkbox" ${s.visible ? "checked" : ""} data-action="vis" data-i="${i}"> show
         </label>
@@ -425,7 +428,7 @@ function _bgColor() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-5";
+  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-6";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
