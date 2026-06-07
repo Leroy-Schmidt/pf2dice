@@ -403,6 +403,16 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 }
 .series-item > button:hover { color: #e55; }
 
+/* per-series delete ✕ — spaced from the "show" checkbox to avoid misclicks */
+.series-del {
+  margin-left: 4px;
+  padding-left: 6px !important;
+  border-left: 1px solid var(--border) !important;
+  font-size: 0.78rem !important;
+  opacity: 0.6;
+}
+.series-del:hover { opacity: 1; color: #e55; }
+
 /* ── Code panel (editable, source of truth) ── */
 
 .sidebar-right { width: 340px; }
@@ -557,6 +567,7 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 }
 .stats-table tbody tr:last-child td { border-bottom: none; }
 .stats-table .st-name { text-align: left; color: var(--text); font-weight: 600; }
+.stats-table .st-sd { text-transform: none; }   /* keep lowercase σ (not "Σ"=sum) */
 .stats-table td { color: var(--text); }
 .stats-table .st-name .series-swatch { display: inline-block; margin-right: 6px; vertical-align: middle; }
 

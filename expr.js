@@ -284,6 +284,7 @@ export function evaluate(src) {
         const dist = evalExpr(body, env);
         if (label) dist.label = label;
         else if (!dist.label) dist.label = body.trim();
+        dist.srcLine = idx;
         series.push(dist);
         return;
       }
@@ -295,6 +296,7 @@ export function evaluate(src) {
       // bare expression → treat as output
       const dist = evalExpr(line, env);
       if (!dist.label) dist.label = line;
+      dist.srcLine = idx;
       series.push(dist);
     } catch (e) {
       errors.push({ line: idx + 1, message: e.message });

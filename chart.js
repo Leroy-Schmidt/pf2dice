@@ -114,8 +114,8 @@ export function renderChart(series, canvasId = "chart") {
     zoom: {
       pan: { enabled: true, mode: "x", onPanComplete: _fireView },
       zoom: {
-        wheel: { enabled: true },
-        drag:  { enabled: false },  // drag = pan (not a zoom box); wheel/pinch zoom
+        wheel: { enabled: true, modifierKey: "ctrl" },  // plain wheel scrolls the page; Ctrl+wheel zooms
+        drag:  { enabled: false },  // drag = pan (not a zoom box)
         pinch: { enabled: true },
         mode: "x",                  // x-axis locked: never zoom the probability axis
         onZoomComplete: _fireView,
@@ -183,28 +183,39 @@ function buildAnnotations(visible, isPdf, yMax) {
     return ann;
   }
   if (yMax == null) return ann;
-  // Label every 0-bar that exceeds the plotted yMax (i.e. is clipped).
-  let n = 0;
+  // Collect every 0-bar that exceeds the plotted yMax (i.e. is clipped).
+  const clipped = [];
   for (const s of visible) {
     const { xs, ys } = s.toXY();
     const zi = xs.indexOf(0);
-    if (zi !== -1 && ys[zi] > yMax) {
-      ann["zero" + n] = {
-        type: "label",
-        xValue: 0,
-        yValue: yMax,
-        xAdjust: 30,            // nudge right so it clears the y-axis
-        yAdjust: 12 + n * 20,
-        content: [`↑ ${(ys[zi] * 100).toFixed(0)}% at 0`],
-        color: "#fff",
-        backgroundColor: s.color,
-        font: { size: 10, weight: "bold" },
-        padding: 4,
-        borderRadius: 3,
-      };
-      n++;
-    }
+    if (zi !== -1 && ys[zi] > yMax) clipped.push({ color: s.color, p: ys[zi] });
   }
+  const K = clipped.length;
+  if (!K) return ann;
+
+  // Fat zero-bar: draw a wide, full-height box at x=0 so width conveys the clipped mass.
+  // Multiple clipped series share a band [-FAT_HALF, +FAT_HALF] side by side.
+  const FAT_HALF = 1.4;                 // band half-width in outcome units (tunable)
+  const boxW = (2 * FAT_HALF) / K;
+  clipped.forEach(({ color, p }, k) => {
+    const x0 = -FAT_HALF + k * boxW;
+    ann["zerobox" + k] = {
+      type: "box",
+      xMin: x0, xMax: x0 + boxW,
+      yMin: 0, yMax: yMax,
+      backgroundColor: color + "cc",
+      borderColor: color,
+      borderWidth: 1,
+    };
+    ann["zerolbl" + k] = {
+      type: "label",
+      xValue: 0, yValue: yMax,
+      xAdjust: 34, yAdjust: 12 + k * 20,
+      content: [`↑ ${(p * 100).toFixed(0)}% at 0`],
+      color: "#fff", backgroundColor: color,
+      font: { size: 10, weight: "bold" }, padding: 4, borderRadius: 3,
+    };
+  });
   return ann;
 }
 

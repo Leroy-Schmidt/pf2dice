@@ -205,7 +205,6 @@
     <div class="series-band-head">
       <h2>Series</h2>
       <div class="series-band-actions">
-        <button type="button" id="btn-compare" class="btn-ghost">Compare…</button>
         <button type="button" id="btn-clear" class="btn-ghost">Clear all</button>
       </div>
     </div>
@@ -221,6 +220,8 @@
         <button id="btn-cdf" class="btn-mode">CDF</button>
       </div>
       <button id="btn-grouped" class="btn-mode" title="PDF only: side-by-side vs overlapping bars">Side by side</button>
+      <span class="toolbar-spacer"></span>
+      <button id="btn-compare" class="btn-mode" title="Compare two series">Compare…</button>
     </div>
 
     <!-- CDF tools (quantile line + value lookup), shown only in CDF mode -->
@@ -242,7 +243,7 @@
         <button id="btn-png" class="btn-icon" title="Download chart as PNG">PNG</button>
         <button id="btn-csv" class="btn-icon" title="Download distributions as CSV">CSV</button>
         <button id="btn-share" class="btn-icon" title="Copy shareable link">Share</button>
-        <button id="btn-zoom-reset" class="btn-icon" title="Reset zoom">⟲</button>
+        <button id="btn-zoom-reset" class="btn-icon" title="Reset zoom &amp; axes (Ctrl+scroll to zoom · drag to pan)">⟲</button>
       </div>
       <canvas id="chart"></canvas>
     </div>

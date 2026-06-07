@@ -54,35 +54,23 @@ committed per step.
 
 ---
 
+### Polish bundle  ✅ done
+- [x] Stats table: `mean`/`σ` moved to the right; σ header exempt from uppercase (renders as
+      a real lowercase σ, not "Σ")
+- [x] Compare button moved into the plot toolbar (right-aligned)
+- [x] Per-series delete ✕ on each chip (removes its `output` line via `dist.srcLine`)
+- [x] Modifier-to-zoom: plain wheel scrolls the page, Ctrl+wheel / pinch zooms, drag pans
+- [x] Fat zero-bar: clipped 0-bars drawn as wide full-height boxes (width conveys the mass)
+
 ## Ideas under consideration (from review — not yet scheduled)
 
-- **Fat zero-bar.** Instead of a thin spike, render the outcome-0 bar wider so the eye keeps
-  a sense of the distribution's center of mass even while it's clipped. (Pairs with the
-  existing zero-bar auto-scale + label.)
 - **Clickable stats → highlight in plot.** Click a value in the stats table (median, P10,
-  P90, mean, …) to draw a marker/line for it on the chart; same for the other quantiles.
-  Reuse the annotation plugin already loaded.
-- **Stats table tweaks (quick).**
-  - **Mean → back on the right.** Reorder columns so `mean` sits at the right end again
-    (currently it's the first numeric column).
-  - **σ needs a clearer symbol.** Std dev *is* already there (`engine.stats().std`, rendered
-    in `ui.js`), but `.stats-table th { text-transform: uppercase }` turns "σ" into "Σ",
-    which reads as *summation*. Give it a small distinguishing glyph/label (e.g. "SD" or
-    "σ" exempted from the uppercase transform).
-- **Move the Compare button into the plot toolbar.** It currently lives in the series band,
-  which is out of reach once you've scrolled down to the open graph. Put it in the
-  PDF/CDF/Side-by-side toolbar, right-aligned, so it's always near the plot.
-- **Per-series delete (✕).** A small remove button to drop a single series. Place it
-  carefully — next to "show" risks misclicks; consider the stats-table row or the right end
-  of the series chip with a little spacing from the checkbox.
+  P90, mean, …) to draw a marker/line for it on the chart. Reuse the annotation plugin.
 - **CDF quantile / reverse-quantile visualization.** The quantile line + "P(X ≤ x)" lookup
   don't read clearly as two lines with an intersection — feels cluttered. Decide whether to
   redesign the visual or keep it numeric-only (the readout panel without chart lines).
-- **Scroll/zoom interaction rethink.** Current model overloads the wheel: page-scroll to get
-  from Code down to the plot, then the wheel zooms once the cursor is over the chart — a
-  context switch that's fine once learned but arguably surprising. Consider: drag-to-zoom
-  only, with chart wheel/pan disabled so the wheel always scrolls the page. (Trade-off:
-  loses quick wheel-zoom. Worth a small experiment.)
+- **Fat zero-bar tuning.** Width/opacity/offset (`FAT_HALF` in `chart.js`) are first-pass —
+  revisit if it feels too wide or busy with many series.
 
 ---
 

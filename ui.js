@@ -129,6 +129,17 @@ function _evaluateAndRender() {
   _persist();
 }
 
+// Remove one series by deleting its source line from the code, then re-evaluate.
+function _deleteSeries(i) {
+  const s = _series[i];
+  if (!s || s.srcLine == null) return;
+  const lines = _codeEl().value.split("\n");
+  lines.splice(s.srcLine, 1);
+  _codeEl().value = lines.join("\n");
+  _visibility.splice(i, 1);
+  _evaluateAndRender();
+}
+
 function _renderErrors(errors) {
   const el = document.getElementById("code-errors");
   if (!el) return;
@@ -146,16 +157,15 @@ function _renderStats(dists) {
   const rows = vis.map(d => {
     const s = d.stats();
     return `<tr>
-      <td class="st-name"><span class="series-swatch" style="background:${d.color}"></span>${d.label}</td>
+      <td class="st-name"><span class="series-swatch" style="background:${d.color}"></span>${_esc(d.label)}</td>
+      <td>${s.min}</td><td>${s.q10}</td><td>${s.q25}</td><td>${s.q50}</td><td>${s.q75}</td><td>${s.q90}</td><td>${s.max}</td>
       <td>${f1(s.mean)}</td><td>${f1(s.std)}</td>
-      <td>${s.min}</td><td>${s.q25}</td><td>${s.q50}</td><td>${s.q75}</td>
-      <td>${s.q10}</td><td>${s.q90}</td><td>${s.max}</td>
     </tr>`;
   }).join("");
   bar.innerHTML = `<table class="stats-table">
     <thead><tr>
       <th class="st-name">Series</th>
-      <th>mean</th><th>σ</th><th>min</th><th>Q1</th><th>med</th><th>Q3</th><th>P10</th><th>P90</th><th>max</th>
+      <th>min</th><th>P10</th><th>Q1</th><th>med</th><th>Q3</th><th>P90</th><th>max</th><th>mean</th><th class="st-sd">σ</th>
     </tr></thead>
     <tbody>${rows}</tbody>
   </table>`;
@@ -176,6 +186,7 @@ function _renderSeriesList() {
         <label class="series-vis">
           <input type="checkbox" ${s.visible ? "checked" : ""} data-action="vis" data-i="${i}"> show
         </label>
+        <button type="button" class="series-del" data-action="del" data-i="${i}" title="Remove this series">✕</button>
       </div>`).join("");
 }
 
@@ -428,7 +439,7 @@ function _bgColor() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-6";
+  if (typeof window !== "undefined") window.__pf2dice_build = "polish-1";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -480,15 +491,20 @@ export function initUI() {
     _evaluateAndRender();
   });
 
-  // Visibility toggles
+  // Series chip actions: show/hide + delete
   document.getElementById("series-list").addEventListener("click", e => {
+    const action = e.target.dataset.action;
     const i = parseInt(e.target.dataset.i);
-    if (isNaN(i) || e.target.dataset.action !== "vis") return;
-    _visibility[i] = e.target.checked;
-    _series[i].visible = e.target.checked;
-    destroyChart();
-    renderChart(_series);
-    _renderStats(_series);
+    if (isNaN(i)) return;
+    if (action === "vis") {
+      _visibility[i] = e.target.checked;
+      _series[i].visible = e.target.checked;
+      destroyChart();
+      renderChart(_series);
+      _renderStats(_series);
+    } else if (action === "del") {
+      _deleteSeries(i);
+    }
   });
 
   // Chart mode + view controls
