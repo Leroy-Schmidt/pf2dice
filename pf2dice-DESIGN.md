@@ -251,32 +251,41 @@ saveSpell(dc, enemyMod, damageDist)
 
 ## 9. UI layout
 
-Stacked (Overleaf-style): the **Form** and **Code** panels sit side by side in a top
-`.io-row`; the full-width **output area** (toolbar, stats, chart, compare) scrolls below.
-Each top panel collapses to a 28px strip, widening its sibling (`flex:1 1 0`); state is
-persisted in localStorage (`pf2dice-sidebar-${side}`).
+**Single document scroll** (redesign round 2): you set things up at the top, then scroll
+down to a near-fullscreen plot — the top scrolls out of view. `.app-layout` is normal block
+flow and `<body>` grows past the viewport (no inner overflow container).
 
 ```
-┌──────────────────────────┬──────────────────────────┐
-│  FORM (collapsible)       │  CODE — source of truth   │  ← .io-row
-│  [Examples…]              │  output twExpert(10) …    │
-│  [⚕ icon category row] ↓  │  output healSpell(3) …    │
-│   bandage plus flask sword│  (editable, monospace)    │
-│  [category-specific rows] │                           │
-└──────────────────────────┴──────────────────────────┘
-┌──────────────────────────────────────────────────────┐
-│  [PDF|CDF] [Side by side]  [zoom −/+/⟲ x:min–max]      │  ← .output-area
-│  [PNG CSV Share]                                       │
-│  stats table · CHART (Chart.js) · Compare two series   │
-└──────────────────────────────────────────────────────┘
+header (scrolls away)
+┌ FORM (full width) ───────────────────────────────────┐│C│ ← Code collapsed by
+│ [Examples…]                                           ││o│   default (28px strip;
+│ [⚕ + 🧪 ⚔ icon category row]  bandage plus flask sword││d│   expand to read/edit).
+│ [category-specific rows · label · Insert]             ││e│   Collapse persists in
+└────────────────────────────────────────────────────────┘└─┘  pf2dice-sidebar-*.
+ series chips:  ●Heal r3 ✓   ●TW expert ✓ …      [Compare…] [Clear all]   ← series band
+   ↳ 3d8 + 24   (dimmed .formula subtitle under preset series)
+ stats table: mean σ min Q1 med Q3 P10 P90 max
+┌ PLOT (.chart-wrap, ~85vh) ─────────────[PNG CSV Share ⟲]┐
+│ 0.40←click        (export + reset overlay, fade-in)     │
+│  ▟▙ ▗▄▖   ← PDF Y scaled to non-zero peak; 0-spike       │
+│ -8↑click           clipped + labelled "↑ 41% at 0"  42↑click
+└──────────────────────────────────────────────────────────┘
+dialogs: #examples-dialog · #compare-dialog
 ```
 
-- **Category picker:** an icon-button row (`icons.js` inline SVG, themed via
-  `currentColor`) drives `#f-category`; the original `<select>` is kept visually-hidden as
-  an accessible fallback.
-- **Examples gallery:** an "Examples…" button opens a `<dialog>` of cards (title +
-  explanation + code preview + Load). Load appends the snippet to the Code panel.
-- **Zoom:** drag pans, wheel/pinch zoom (no drag-select box); x-axis locked.
+- **Top panels** (`.io-row`): Form + Code side by side, each collapsible to a 28px strip
+  widening its sibling (`flex:1 1 0`). Code defaults to collapsed (form gets full width).
+- **Category picker:** icon-button row (`icons.js` inline SVG, `currentColor`) drives
+  `#f-category`; the `<select>` is kept visually-hidden as an accessible fallback.
+- **Examples gallery / Compare:** `<dialog>`s opened from the form / series band.
+- **Series band:** active series as chips (color swatch, name, dimmed dice-`formula`
+  subtitle, show/hide) + the statistics table. Always visible above the plot.
+- **Plot:** ~85vh. Export (PNG/CSV/Share) + reset live in a fade-in corner overlay.
+  Zoom = wheel/pinch; pan = drag; x-axis locked. **Zero-bar:** in PDF the Y-axis auto-scales
+  to the tallest non-zero bar so the outcome-0 spike (misses/fails) can't flatten the rest;
+  each clipped 0-bar is annotated with its true probability.
+- **Click-to-edit axes:** hovering the plot reveals small labels at the axis ends —
+  probability max (top-left), outcome min/max (bottom corners); click to type a limit.
 
 ---
 
@@ -433,9 +442,19 @@ output twExpert(12) named "TW expert +12"
 output pf2save(25, +8) * (8d6) named "Fireball"   # basic-save spell
 ```
 
-- `name = expr` — bind a variable (reusable, not plotted)
+- `name = expr` — bind a variable (reusable, not plotted). `let name = expr` also works
+  (the `let` keyword is optional sugar).
 - `output expr [named "label"]` — evaluate and add as a plotted series
 - `#` to end of line — comment
+
+**Literals:** numbers, dice (`2d6`), and the booleans `true` / `false` (which evaluate to
+the scalars 1 / 0). Booleans drive the flag arguments on presets, e.g.
+`twExpert(12, true)` (Risky Surgery) and `strikeRoutine(..., true)` (agile).
+
+**Preset transparency:** preset functions attach a readable `.formula` string to their
+returned `Dist` (e.g. `healSpell(3)` → `"3d8 + 24"`, TW shows its degree breakdown). The UI
+renders it as a dimmed subtitle in the series chip and in the chart tooltip. Composite
+expressions carry no `.formula` (the code body already *is* the formula).
 
 ### 16.3 Grammar (precedence, low → high)
 

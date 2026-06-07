@@ -44,7 +44,8 @@ Phase 5 shareable interactive embed, Phase 6 developer docs (`README.md` / `VISI
 - [x] Export chart as PNG (composited onto theme background)
 - [x] Export visible distribution(s) as CSV (value + per-series PDF columns)
 - [x] "Copy share link" button (current URL hash) with "Copied!" feedback
-- [x] Saved scenarios (named localStorage slots: save / load / delete)
+- [x] ~~Saved scenarios (named localStorage slots)~~ — REMOVED in redesign round 2
+      (share links cover persistence; the UI was clutter)
 - [~] Code panel syntax highlighting + autocomplete — DEFERRED (needs overlay or
       CodeMirror; not worth a fragile textarea hack. Revisit during/after redesign.)
 - [x] Dev: no-store server (server.py) for reliable live verification
@@ -61,6 +62,17 @@ Phase 5 shareable interactive embed, Phase 6 developer docs (`README.md` / `VISI
 - [x] Parchment palette deepened; Cinzel display font; EB Garamond body; paper texture
 - [x] Ornamental dividers (❧ on headings, ⚜ flourishes on title); "Parchment" is now default
 - [x] Screenshot self-check passed — NEEDS YOUR EYE to confirm it feels right
+
+### 6. Redesign rounds 1–2 (ROADMAP)  ✅ done
+- [x] R1: declutter + zoom fix, stacked layout, category icons + examples gallery
+- [x] R2 P1: boolean literals (`true`/`false`) — fixes Risky Surgery `twExpert(x,true)`;
+      `let` assignment sugar
+- [x] R2 P2: single-document-scroll layout, Code collapsed by default, series band with the
+      restored stats table, ~85vh plot; removed scenarios + all quick-picks
+- [x] R2 P3: slim plot toolbar (export/reset overlay); zero-bar auto-scale + label
+- [x] R2 P4: click-to-edit axis ends (probability max, outcome min/max)
+- [x] R2 P5: Compare moved into a dialog
+- [x] R2 P6: preset dice-math transparency (`.formula` subtitle + tooltip)
 
 ---
 

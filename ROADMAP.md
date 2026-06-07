@@ -1,8 +1,12 @@
 # PF2Dice — Roadmap: Declutter, Restack, Onboard & Share
 
-> Status: **block complete.** Scope was Phases 1–3 (Phases 4–6 deferred).
-> Phase 1 (declutter & zoom) ✅ · Phase 2 (stacked layout) ✅ · Phase 3 (icons + gallery)
-> ✅. See `BACKLOG.md` for running history and `pf2dice-DESIGN.md` for architecture.
+> Status: **R1 (Phases 1–3) ✅ + Redesign round 2 ✅.**
+> R1: declutter & zoom · stacked layout · icons + examples gallery.
+> R2 (post-review): single-scroll layout (Code collapsed by default), restored stats band,
+> zero-bar auto-scale, click-to-edit axes, compare dialog, preset `.formula` transparency,
+> plus language fixes (`true`/`false` literals → Risky Surgery; `let` sugar).
+> **Next up: Phase 4 `param`/`slider()` live sliders** (e.g. `x = slider(12, 0, 20)`), then
+> Phase 5 shareable embed and Phase 6 developer docs. See `BACKLOG.md` for history.
 
 ## Context
 
