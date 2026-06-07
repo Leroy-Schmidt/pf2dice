@@ -231,6 +231,8 @@ function evalNode(node, env) {
     }
     case "var": {
       if (env && node.name in env) return env[node.name];
+      if (node.name === "true")  return Dist.const(1);   // boolean literal → flag scalar
+      if (node.name === "false") return Dist.const(0);
       throw new Error(`Unknown name '${node.name}'`);
     }
     case "call": {
@@ -269,7 +271,8 @@ export function evaluate(src) {
   const lines = src.split("\n");
 
   lines.forEach((rawLine, idx) => {
-    const line = rawLine.replace(/#.*$/, "").trim();
+    // strip comment + trim, then drop an optional `let ` before an assignment (sugar)
+    const line = rawLine.replace(/#.*$/, "").trim().replace(/^let\s+(?=[A-Za-z_]\w*\s*=)/, "");
     if (!line) return;
     try {
       const outMatch = line.match(/^output\s+(.*)$/s);

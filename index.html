@@ -425,6 +425,18 @@
     const nAtk = evalExpr("pf2attack(+5, 20) * (2d6+5)").ev();
     const fok = fAtk >= nAtk - 1e-9;
     console[fok ? "log" : "error"](`${fok ? "PASS" : "FAIL"}: fortune >= normal (${fAtk.toFixed(3)} >= ${nAtk.toFixed(3)})`);
+
+    // language: boolean literal unblocks Risky Surgery — twExpert(10, true) ≈ 13.475
+    const rsProg = evaluate('output twExpert(10, true) named "RS"');
+    const rsOk = rsProg.errors.length === 0 && rsProg.series.length === 1 &&
+                 Math.abs(rsProg.series[0].ev() - 13.475) < 1e-3;
+    console[rsOk ? "log" : "error"](`${rsOk ? "PASS" : "FAIL"}: twExpert(10,true) RS (errors=${rsProg.errors.length}, mean=${rsProg.series[0]?.ev().toFixed(3)})`);
+
+    // language: `let` sugar + variable reuse — let x = 20 / output twExpert(x)
+    const varProg = evaluate('let x = 20\noutput twExpert(x)');
+    const varOk = varProg.errors.length === 0 && varProg.series.length === 1 &&
+                  Math.abs(varProg.series[0].ev() - twExpert(20).ev()) < 1e-9;
+    console[varOk ? "log" : "error"](`${varOk ? "PASS" : "FAIL"}: let x=20 / twExpert(x) (errors=${varProg.errors.length})`);
   }
 </script>
 

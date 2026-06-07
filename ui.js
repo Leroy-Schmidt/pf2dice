@@ -350,7 +350,7 @@ function _refreshScenarioList() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "gallery-1";
+  if (typeof window !== "undefined") window.__pf2dice_build = "lang-1";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
