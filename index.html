@@ -78,15 +78,6 @@
           <label>Medicine modifier
             <input type="number" id="f-mod" value="10" min="-10" max="40">
           </label>
-          <div class="quickpick">
-            <span class="quickpick-label">Quick:</span>
-            <button class="qp" data-mod="5">+5</button>
-            <button class="qp" data-mod="10">+10</button>
-            <button class="qp" data-mod="12">+12</button>
-            <button class="qp" data-mod="15">+15</button>
-            <button class="qp" data-mod="18">+18</button>
-            <button class="qp" data-mod="20">+20</button>
-          </div>
           <label class="checkbox-label">
             <input type="checkbox" id="f-rs"> Risky Surgery
           </label>
@@ -98,14 +89,6 @@
           <label>Spell rank
             <input type="number" id="f-rank" value="3" min="1" max="10">
           </label>
-          <div class="quickpick">
-            <span class="quickpick-label">Quick:</span>
-            <button class="qp" data-rank="1">1</button>
-            <button class="qp" data-rank="3">3</button>
-            <button class="qp" data-rank="5">5</button>
-            <button class="qp" data-rank="7">7</button>
-            <button class="qp" data-rank="9">9</button>
-          </div>
         </div>
 
         <!-- Attack options -->
@@ -143,12 +126,6 @@
                 <option value="12">d12</option>
               </select>
             </label>
-          </div>
-          <div class="quickpick">
-            <span class="quickpick-label">Striking rune:</span>
-            <button class="qp" data-striking="1">None (1 die)</button>
-            <button class="qp" data-striking="2">+1 (2 dice)</button>
-            <button class="qp" data-striking="3">+2 (3 dice)</button>
           </div>
           <label>Damage bonus
             <input type="number" id="f-dmgbonus" value="4" min="0" max="30">
@@ -204,25 +181,6 @@
         <button id="btn-add" class="btn-primary">+ Insert into code</button>
       </section>
 
-      <section class="panel">
-        <h2>Series</h2>
-        <div id="series-list"></div>
-        <button id="btn-clear" class="btn-ghost">Clear all code</button>
-      </section>
-
-      <section class="panel">
-        <h2>Scenarios</h2>
-        <div class="scen-save-row">
-          <input type="text" id="scen-name" placeholder="scenario name">
-          <button id="btn-scen-save" class="btn-ghost">Save</button>
-        </div>
-        <div class="scen-load-row">
-          <select id="scen-list"><option value="">— saved —</option></select>
-          <button id="btn-scen-load" class="btn-ghost">Load</button>
-          <button id="btn-scen-del" class="btn-ghost" title="Delete">✕</button>
-        </div>
-      </section>
-
     </div>
   </aside>
 
@@ -242,7 +200,20 @@
 
   </div><!-- /io-row -->
 
-  <!-- Output: chart, stats, compare (full width) -->
+  <!-- Series band: active series + statistics (always visible, above the plot) -->
+  <div class="series-band">
+    <div class="series-band-head">
+      <h2>Series</h2>
+      <div class="series-band-actions">
+        <button type="button" id="btn-compare" class="btn-ghost">Compare…</button>
+        <button type="button" id="btn-clear" class="btn-ghost">Clear all</button>
+      </div>
+    </div>
+    <div id="series-list"></div>
+    <div id="stats-bar" class="stats-bar"></div>
+  </div>
+
+  <!-- Output: the plot (full width) -->
   <main class="output-area">
     <div class="chart-toolbar">
       <div class="btn-group" role="group" title="What to plot">
@@ -288,7 +259,6 @@
       </div>
     </div>
 
-    <div id="stats-bar" class="stats-bar"></div>
     <div class="chart-wrap">
       <canvas id="chart"></canvas>
     </div>
@@ -333,12 +303,14 @@
     b.addEventListener("click", () => applyTheme(b.dataset.theme))
   );
 
-  // Sidebar collapse
+  // Panel collapse. Code (right) defaults to collapsed so the form gets full width.
   ["left", "right"].forEach(side => {
     const sidebar = document.getElementById(`sidebar-${side}`);
     const btn     = document.getElementById(`toggle-${side}`);
     const key     = `pf2dice-sidebar-${side}`;
-    if (localStorage.getItem(key) === "1") sidebar.classList.add("collapsed");
+    const stored  = localStorage.getItem(key);
+    const collapsed = stored === null ? (side === "right") : (stored === "1");
+    if (collapsed) sidebar.classList.add("collapsed");
     btn.addEventListener("click", () => {
       sidebar.classList.toggle("collapsed");
       localStorage.setItem(key, sidebar.classList.contains("collapsed") ? "1" : "0");

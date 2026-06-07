@@ -333,24 +333,10 @@ function _bgColor() {
   return getComputedStyle(document.documentElement).getPropertyValue("--bg").trim() || "#1a1a1a";
 }
 
-const SCEN_KEY = "pf2dice-scenarios";
-function _loadScenarios() {
-  try { return JSON.parse(localStorage.getItem(SCEN_KEY)) || {}; } catch { return {}; }
-}
-function _saveScenarios(obj) { localStorage.setItem(SCEN_KEY, JSON.stringify(obj)); }
-function _refreshScenarioList() {
-  const sel = document.getElementById("scen-list");
-  if (!sel) return;
-  const scen = _loadScenarios();
-  const names = Object.keys(scen).sort();
-  sel.innerHTML = `<option value="">— saved —</option>` +
-    names.map(n => `<option value="${n.replace(/"/g, "&quot;")}">${n}</option>`).join("");
-}
-
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "lang-1";
+  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-2";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -384,15 +370,6 @@ export function initUI() {
     el?.addEventListener("change", _updatePreview);
     el?.addEventListener("input",  _updatePreview);
   });
-
-  // Quick-pick buttons
-  const qp = (sel, target) => document.querySelectorAll(sel).forEach(btn =>
-    btn.addEventListener("click", () => { document.getElementById(target).value = btn.dataset[Object.keys(btn.dataset)[0]]; _updatePreview(); }));
-  qp(".qp[data-mod]", "f-mod");
-  qp(".qp[data-rank]", "f-rank");
-
-  document.querySelectorAll(".qp[data-striking]").forEach(btn =>
-    btn.addEventListener("click", () => { document.getElementById("f-ndice").value = btn.dataset.striking; _updatePreview(); }));
 
   document.getElementById("f-weapon")?.addEventListener("change", e => {
     if (!e.target.value) return;
@@ -533,33 +510,6 @@ export function initUI() {
       b.textContent = "Copied!";
       setTimeout(() => { b.textContent = t; }, 1200);
     } catch {}
-  });
-
-  // Scenarios
-  _refreshScenarioList();
-  document.getElementById("btn-scen-save")?.addEventListener("click", () => {
-    const name = document.getElementById("scen-name").value.trim();
-    if (!name) return;
-    const scen = _loadScenarios();
-    scen[name] = _codeEl().value;
-    _saveScenarios(scen);
-    _refreshScenarioList();
-    document.getElementById("scen-list").value = name;
-    document.getElementById("scen-name").value = "";
-  });
-  document.getElementById("btn-scen-load")?.addEventListener("click", () => {
-    const name = document.getElementById("scen-list").value;
-    if (!name) return;
-    const scen = _loadScenarios();
-    if (scen[name] != null) { _codeEl().value = scen[name]; _evaluateAndRender(); }
-  });
-  document.getElementById("btn-scen-del")?.addEventListener("click", () => {
-    const name = document.getElementById("scen-list").value;
-    if (!name) return;
-    const scen = _loadScenarios();
-    delete scen[name];
-    _saveScenarios(scen);
-    _refreshScenarioList();
   });
 
   // Reflect persisted chart mode in toolbar

@@ -61,9 +61,10 @@
 
 /* ── Base ── */
 
-html, body { height: 100%; }
+html { height: 100%; }
 
 body {
+  min-height: 100%;
   background: var(--paper, none), var(--bg);
   background-attachment: fixed;
   color: var(--text);
@@ -118,23 +119,22 @@ header h1 {
 
 /* ── App layout: stacked — Form+Code row on top, output below ── */
 
+/* Single document scroll: the layout grows past the viewport and the window
+   scrolls, so the setup row + series band scroll away from the big plot. */
 .app-layout {
-  flex: 1;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-  min-height: 0;
 }
 
-/* Top row: Form (left) + Code (right), side by side, each collapsible */
+/* Top row: Form (left) + Code (right), side by side, each collapsible.
+   Natural height (no fixed vh) so the form can be tall and the page scrolls. */
 .io-row {
   display: flex;
-  flex-shrink: 0;
-  height: 42vh;
-  min-height: 220px;
   border-bottom: 1px solid var(--border);
-  overflow: hidden;
 }
+/* cap the form's height so a very tall form still scrolls internally a bit,
+   rather than pushing the plot absurdly far down */
+.io-row .sidebar-inner { max-height: 70vh; }
 
 /* ── Sidebars ── */
 
@@ -162,6 +162,8 @@ header h1 {
 .io-row .sidebar { flex: 1 1 0; width: auto; }
 .io-row .sidebar.collapsed { flex: 0 0 28px; width: 28px; }
 .io-row .sidebar .sidebar-inner { min-width: 0; }
+/* a collapsed panel must not reserve vertical space (else it inflates the row) */
+.io-row .sidebar.collapsed .sidebar-inner { display: none; }
 
 .sidebar-inner {
   flex: 1;
@@ -198,13 +200,11 @@ header h1 {
 /* ── Output area (full-width, below the io-row) ── */
 
 .output-area {
-  flex: 1;
   display: flex;
   flex-direction: column;
   padding: 12px;
   gap: 10px;
   min-width: 0;
-  overflow-y: auto;
 }
 
 /* ── Panels inside sidebars ── */
@@ -342,26 +342,54 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 }
 .btn-ghost:hover { border-color: #e55; color: #e55; }
 
-/* ── Series list ── */
+/* ── Series band (active series + statistics, above the plot) ── */
 
+.series-band {
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.series-band-head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+.series-band-actions { display: flex; gap: 6px; }
+
+/* series as compact chips that wrap */
+#series-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
 .series-item {
   display: flex;
   align-items: center;
-  gap: 7px;
-  padding: 5px 0;
-  border-bottom: 1px solid var(--border);
+  gap: 6px;
+  padding: 4px 9px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 999px;
   font-size: 0.82rem;
 }
-.series-item:last-child { border-bottom: none; }
+.series-item.hidden-series { opacity: 0.5; }
 
 .series-swatch { width: 11px; height: 11px; border-radius: 2px; flex-shrink: 0; }
-.series-name   { flex: 1; line-height: 1.3; }
+.series-name   { line-height: 1.3; }
+.series-formula {
+  color: var(--text-dim);
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.72rem;
+}
 
 .series-vis {
   flex-direction: row;
   align-items: center;
   gap: 3px;
-  font-size: 0.75rem;
+  font-size: 0.72rem;
   color: var(--text-dim);
   white-space: nowrap;
 }
@@ -631,8 +659,8 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 /* ── Chart ── */
 
 .chart-wrap {
-  flex: 1;
-  min-height: 300px;
+  height: 85vh;
+  min-height: 420px;
   background: var(--surface);
   border: 1px solid var(--border);
   border-radius: 6px;
