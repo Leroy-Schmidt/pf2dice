@@ -573,14 +573,21 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
 
 /* ── Comparison panel ── */
 
-.compare-panel {
-  background: var(--surface);
+.compare-dialog {
+  width: min(560px, 92vw);
+  padding: 0;
   border: 1px solid var(--border);
-  border-radius: 6px;
-  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--surface);
+  color: var(--text);
+  overflow: hidden;
+}
+.compare-dialog::backdrop { background: rgba(0,0,0,0.45); }
+.compare-body {
+  padding: 16px;
   display: flex;
   flex-direction: column;
-  gap: 10px;
+  gap: 12px;
 }
 
 .compare-selectors {

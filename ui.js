@@ -281,6 +281,18 @@ function _esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+function _initCompare() {
+  const dialog = document.getElementById("compare-dialog");
+  const open   = document.getElementById("btn-compare");
+  const close  = document.getElementById("compare-close");
+  if (!dialog || !open) return;
+  open.addEventListener("click", () => { _renderCompare(); dialog.showModal(); });
+  close?.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
+  document.getElementById("cmp-a")?.addEventListener("change", _renderCompare);
+  document.getElementById("cmp-b")?.addEventListener("change", _renderCompare);
+}
+
 // ── Click-to-edit axis ends ────────────────────────────────────────────────────
 // Small clickable labels overlaid at the axis ends: probability max (top-left),
 // outcome min (bottom-left), outcome max (bottom-right). Click → type a limit.
@@ -413,7 +425,7 @@ function _bgColor() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-4";
+  if (typeof window !== "undefined") window.__pf2dice_build = "redesign-5";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -564,8 +576,7 @@ export function initUI() {
     clearYMax();
     renderChart(_series);
   });
-  document.getElementById("cmp-a")?.addEventListener("change", _renderCompare);
-  document.getElementById("cmp-b")?.addEventListener("change", _renderCompare);
+  _initCompare();
 
   // Export / share
   document.getElementById("btn-png")?.addEventListener("click", () => exportPNG(_bgColor(), "pf2dice.png"));

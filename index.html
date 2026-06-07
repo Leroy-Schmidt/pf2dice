@@ -246,17 +246,6 @@
       </div>
       <canvas id="chart"></canvas>
     </div>
-
-    <!-- Comparison panel -->
-    <section class="compare-panel" id="compare-panel">
-      <h2>Compare two series</h2>
-      <div class="compare-selectors">
-        <select id="cmp-a"></select>
-        <span class="compare-vs">vs</span>
-        <select id="cmp-b"></select>
-      </div>
-      <div id="compare-result" class="compare-result"></div>
-    </section>
   </main>
 
 </div>
@@ -268,6 +257,22 @@
     <button type="button" id="examples-close" class="btn-ghost" title="Close">✕</button>
   </div>
   <div id="examples-grid" class="examples-grid"></div>
+</dialog>
+
+<!-- Compare two series -->
+<dialog id="compare-dialog" class="compare-dialog">
+  <div class="examples-head">
+    <h2>Compare two series</h2>
+    <button type="button" id="compare-close" class="btn-ghost" title="Close">✕</button>
+  </div>
+  <div class="compare-body">
+    <div class="compare-selectors">
+      <select id="cmp-a"></select>
+      <span class="compare-vs">vs</span>
+      <select id="cmp-b"></select>
+    </div>
+    <div id="compare-result" class="compare-result"></div>
+  </div>
 </dialog>
 
 <script type="module">
