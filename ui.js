@@ -27,6 +27,31 @@ const EXAMPLES = [
     code: 'output persistent(1d6) named "Persistent 1d6 bleed"' },
   { title: "Keep-higher d20", desc: "Roll 2d20 and keep the higher (advantage-style).",
     code: 'output keephigh(2, 20) named "d20 with Fortune"' },
+  { title: "Medic Dedication (master TW)", desc: "Treat Wounds at master with +10 HP on a working check (Medic Dedication). Built from degreeMix.",
+    code: 'output degreeMix(+18, 30, -1d8, 0, 2d8+40, 4d8+40) named "TW master + Medic"' },
+  { title: "Custom roll (degreeMix)", desc: "The universal builder: one d20 vs a DC, a full expression per degree.",
+    code: 'output degreeMix(+15, 24, 0, 0, 2d6+4, 4d6+8) named "Custom strike"' },
+];
+
+// Base / Turing-complete building blocks shown in the Functions reference dialog.
+// Everything else (twExpert, healSpell, potions, strike, fireball…) is a wrapper of these.
+const FUNCTIONS = [
+  { group: "Building blocks", items: [
+    { sig: "d(n)   ·   2d6", desc: "A die, or N of them (d8, 2d6, 1d20). Combine with + − *." },
+    { sig: "a + b    a − b", desc: "Independent sum / difference of two distributions (convolution)." },
+    { sig: "k * expr", desc: "Scale outcome values by a number (2 * d6 → 2,4,…,12)." },
+    { sig: "degreeMix(mod, dc, cf, f, s, cs)", desc: "ONE d20 vs DC; assign a full expression to each degree — crit-fail, fail, success, crit-success. The universal roll builder: e.g. degreeMix(+18, 30, −1d8, 0, 2d8+30, 4d8+30) == twMaster(18)." },
+  ]},
+  { group: "Common rolls", items: [
+    { sig: "pf2attack(mod, dc)", desc: "Attack degree multipliers {miss 0, hit 1, crit ×2}. Use as pf2attack(…) * damage." },
+    { sig: "pf2save(dc, saveMod)", desc: "Basic-save multipliers {crit-fail ×2, fail 1, success ½, crit-success 0}. Use * damage." },
+    { sig: "pf2roll(mod, dc, cf, f, s, cs)", desc: "Degree distribution over custom multiplier values per degree." },
+    { sig: "pf2attackfortune · pf2savefortune", desc: "As above, but roll the d20 twice and keep the better (Fortune / Hero Point)." },
+  ]},
+  { group: "Dice tricks", items: [
+    { sig: "keephigh(n, faces) · keeplow(n, faces)", desc: "Highest / lowest of n dice (advantage / disadvantage)." },
+    { sig: "persistent(dmg, flatDC=15)", desc: "Total recurring persistent damage until a flat check ends it." },
+  ]},
 ];
 
 const COLORS = [
@@ -295,6 +320,32 @@ function _esc(s) {
     ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
 }
 
+function _initFunctions() {
+  const dialog = document.getElementById("functions-dialog");
+  const body   = document.getElementById("functions-body");
+  const open    = document.getElementById("btn-functions");
+  const close   = document.getElementById("functions-close");
+  if (!dialog || !body || !open) return;
+
+  body.innerHTML = FUNCTIONS.map(g => `
+    <div class="func-group">
+      <h3>${_esc(g.group)}</h3>
+      ${g.items.map(it => `
+        <div class="func-item">
+          <code>${_esc(it.sig)}</code>
+          <p>${_esc(it.desc)}</p>
+        </div>`).join("")}
+    </div>`).join("") +
+    `<p class="func-note">Everything else — <code>twExpert</code>, <code>healSpell</code>,
+     <code>potionMinor…</code>, <code>strike</code>, <code>fireball</code>,
+     <code>targetAC/Save/levelDC</code> — is a convenience wrapper built from these.
+     Hit a case that isn't covered? Build it with <code>degreeMix</code>.</p>`;
+
+  open.addEventListener("click", () => dialog.showModal());
+  close?.addEventListener("click", () => dialog.close());
+  dialog.addEventListener("click", e => { if (e.target === dialog) dialog.close(); });
+}
+
 function _initCompare() {
   const dialog = document.getElementById("compare-dialog");
   const open   = document.getElementById("btn-compare");
@@ -439,7 +490,7 @@ function _bgColor() {
 // ── Init ─────────────────────────────────────────────────────────────────────
 
 export function initUI() {
-  if (typeof window !== "undefined") window.__pf2dice_build = "polish-1";
+  if (typeof window !== "undefined") window.__pf2dice_build = "degreemix-1";
   _codeEl().value = _loadCode();
 
   // Live code editing (debounced)
@@ -463,8 +514,9 @@ export function initUI() {
   });
   _updateCategoryRows();
 
-  // Examples gallery + click-to-edit axis ends
+  // Examples gallery + functions reference + click-to-edit axis ends
   _initExamples();
+  _initFunctions();
   _initAxisEditors();
 
   ["f-tw-tier","f-mod","f-rank","f-rs","f-potion-tier",

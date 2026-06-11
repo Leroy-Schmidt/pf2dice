@@ -9,7 +9,9 @@
       "Read(//c/Users/Nutzer/AppData/Roaming/**)",
       "mcp__Claude_Preview__preview_start",
       "WebSearch",
-      "WebFetch(domain:2e.aonprd.com)"
+      "WebFetch(domain:2e.aonprd.com)",
+      "Bash(python sensitivitaet.py)",
+      "PowerShell(& \"C:\\\\Users\\\\Nutzer\\\\miniconda3\\\\python.exe\" --version)"
     ]
   }
 }

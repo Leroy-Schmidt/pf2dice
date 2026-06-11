@@ -194,6 +194,17 @@ const FUNCS = {
   pf2roll:    (mod, dc, cf, f, s, cs) =>
                 degreeDist(asScalar(mod), asScalar(dc),
                   [asScalar(cf), asScalar(f), asScalar(s), asScalar(cs)]),
+  // Per-degree expression mixer on ONE shared d20 roll: assign a full distribution to
+  // each degree. The universal roll builder — twExpert/strike/etc. are just this.
+  // e.g. degreeMix(+18, 30, -1d8, 0, 2d8+30, 4d8+30)  ==  twMaster(18)
+  degreeMix:  (mod, dc, cf, f, s, cs) => {
+                const m = asScalar(mod), c = asScalar(dc);
+                const probs = [0, 0, 0, 0];
+                for (let roll = 1; roll <= 20; roll++) probs[degreesOfSuccess(roll, m, c)] += 1 / 20;
+                return new Dist(new Map()).weightedSum([
+                  [cf, probs[0]], [f, probs[1]], [s, probs[2]], [cs, probs[3]],
+                ]);
+              },
   keephigh:   (n, faces) => keepHigh(asScalar(n), asScalar(faces)),
   keeplow:    (n, faces) => keepLow(asScalar(n), asScalar(faces)),
   persistent: (dmg, dc) => persistentDamage(dmg, dc ? asScalar(dc) : 15),

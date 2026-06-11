@@ -46,7 +46,10 @@
       <section class="panel">
         <div class="panel-head">
           <h2>Add series</h2>
-          <button type="button" id="btn-examples" class="btn-ghost btn-examples">Examples…</button>
+          <div class="panel-head-actions">
+            <button type="button" id="btn-functions" class="btn-ghost btn-examples">Functions</button>
+            <button type="button" id="btn-examples" class="btn-ghost btn-examples">Examples…</button>
+          </div>
         </div>
 
         <!-- Category: icon buttons drive #f-category; select kept as fallback -->
@@ -260,6 +263,15 @@
   <div id="examples-grid" class="examples-grid"></div>
 </dialog>
 
+<!-- Function reference (base / Turing-complete building blocks) -->
+<dialog id="functions-dialog" class="examples-dialog">
+  <div class="examples-head">
+    <h2>Functions</h2>
+    <button type="button" id="functions-close" class="btn-ghost" title="Close">✕</button>
+  </div>
+  <div id="functions-body" class="functions-body"></div>
+</dialog>
+
 <!-- Compare two series -->
 <dialog id="compare-dialog" class="compare-dialog">
   <div class="examples-head">
@@ -399,6 +411,13 @@
     const varOk = varProg.errors.length === 0 && varProg.series.length === 1 &&
                   Math.abs(varProg.series[0].ev() - twExpert(20).ev()) < 1e-9;
     console[varOk ? "log" : "error"](`${varOk ? "PASS" : "FAIL"}: let x=20 / twExpert(x) (errors=${varProg.errors.length})`);
+
+    // degreeMix is the base primitive: it must reproduce the twMaster wrapper exactly
+    const dmDist = evalExpr('degreeMix(+18, 30, -1d8, 0, 2d8+30, 4d8+30)');
+    const dmOk = Math.abs(dmDist.ev() - twMaster(18).ev()) < 1e-9 &&
+                 dmDist.stats().min === twMaster(18).stats().min &&
+                 dmDist.stats().max === twMaster(18).stats().max;
+    console[dmOk ? "log" : "error"](`${dmOk ? "PASS" : "FAIL"}: degreeMix == twMaster(18) (${dmDist.ev().toFixed(3)} == ${twMaster(18).ev().toFixed(3)})`);
   }
 </script>
 

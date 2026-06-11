@@ -499,6 +499,11 @@ pf2save(dc, saveMod)         degree dist, mults {cf:2, f:1, s:0.5, cs:0} (basic 
 pf2attackfortune(mod, dc)    as pf2attack, Fortune (roll d20 twice keep higher)
 pf2savefortune(dc, saveMod)  as pf2save, Fortune
 pf2roll(mod, dc, cf,f,s,cs)  degree dist, fully custom mults
+degreeMix(mod, dc, cf,f,s,cs) ONE d20 vs DC; each of cf/f/s/cs is a *full expression*
+                             assigned to that degree (not a multiplier). The universal
+                             roll builder — e.g. degreeMix(+18,30,-1d8,0,2d8+30,4d8+30)
+                             == twMaster(18). Use for cases no wrapper covers (e.g. the
+                             Medic Dedication +HP). Built on degreesOfSuccess + weightedSum.
 keephigh(n, faces)           highest of n d(faces)  (advantage-style)
 keeplow(n, faces)            lowest of n d(faces)
 persistent(dmg, flatDC=15)   total persistent damage until flat check passes (geometric, exact)

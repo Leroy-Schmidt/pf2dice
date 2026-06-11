@@ -23,13 +23,25 @@ committed per step.
 - **Redesign R2** — `true`/`false` literals (Risky-Surgery fix) + `let` sugar; single-scroll
   layout (Code collapsed by default) + restored stats band; zero-bar auto-scale + label;
   click-to-edit axis ends; compare dialog; preset `.formula` transparency.
+- **Polish** — stats `mean`/`σ` on the right (σ no longer reads as Σ); Compare in the plot
+  toolbar; per-series ✕ delete; modifier-to-zoom (Ctrl+wheel); fat zero-bar boxes.
+- **`degreeMix`** — per-degree expression mixer (the missing Turing-complete primitive);
+  reproduces every TW/strike wrapper, unblocks custom cases (e.g. Medic Dedication). Plus a
+  **Functions** reference dialog listing the base building blocks.
 - **Removed** — named scenarios (share links cover persistence).
 
 ---
 
 ## Next up (planned — inherited from the retired ROADMAP)
 
-### Phase 4 — Parameters / sliders   ← NEXT
+### Expand wrappers → base functions (button "B")   ← small follow-up
+- A button that rewrites a preset call in the code into its `degreeMix(...)` / dice form.
+  Presets would carry a *machine-valid* `.expand` string (alongside the existing readable
+  `.formula`); the button replaces the body on pure-preset `output` lines (skip composites
+  like `pf2save(...) * fireball(5)`, which have no single expansion).
+- Pairs with the shipped Functions reference + `degreeMix` so users can learn by expanding.
+
+### Phase 4 — Parameters / sliders   ← then this
 - `expr.js`: `evaluate(src, paramValues = {})`; support `x = slider(DEFAULT, MIN, MAX[, STEP])`
   (and/or `param X = DEFAULT (MIN..MAX[, STEP])`) — register a param, inject its current
   value (point-mass) into the env, return `{ series, errors, params }`.

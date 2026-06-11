@@ -754,6 +754,37 @@ input:focus, select:focus { outline: 1px solid var(--accent); }
   gap: 8px;
 }
 .btn-examples { flex-shrink: 0; font-size: 0.78rem; padding: 3px 8px; }
+.panel-head-actions { display: flex; gap: 6px; flex-shrink: 0; }
+
+/* Functions reference dialog */
+.functions-body {
+  padding: 16px;
+  overflow-y: auto;
+  max-height: calc(82vh - 56px);
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+.func-group h3 {
+  margin: 0 0 8px;
+  font-family: var(--font-display);
+  font-size: 0.82rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--text-dim);
+}
+.func-item {
+  padding: 7px 0;
+  border-top: 1px solid var(--border);
+}
+.func-item code {
+  font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+  font-size: 0.8rem;
+  color: var(--code-color);
+}
+.func-item p { margin: 3px 0 0; font-size: 0.82rem; color: var(--text); }
+.func-note { font-size: 0.8rem; color: var(--text-dim); line-height: 1.5; }
+.func-note code { font-family: "Cascadia Code", monospace; font-size: 0.76rem; color: var(--code-color); }
 
 .cat-icons {
   display: grid;
